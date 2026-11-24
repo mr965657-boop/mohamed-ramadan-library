@@ -69,6 +69,16 @@ function buildUrl(base: string) {
               <span>{t.readInside}</span>
             </a>
 
+            {book.content && book.content.trim() && (
+              <a
+                href="#reader-canvas"
+                class="w-full py-2 px-3 bg-[#FAF7F0] hover:bg-[#E2DCD0] text-[#143D33] text-center font-semibold text-xs rounded-xl border border-[#E2DCD0] transition-colors flex items-center justify-center gap-1.5"
+              >
+                <span>📜</span>
+                <span>{lang === 'ar' ? 'التمرير لمتن العمل بالأسفل' : 'Scroll to text below'}</span>
+              </a>
+            )}
+
             {book.allow_download && book.file_url && (
               <a
                 href={book.file_url}
