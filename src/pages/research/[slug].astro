@@ -155,8 +155,8 @@ const isProject = item.type === 'project';
     )}
 
     <!-- متن البحث والأقسام الرئيسية -->
-    <article class="bg-white dark:bg-[#1A2433] rounded-2xl p-6 sm:p-10 border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm leading-relaxed text-[#151C24] dark:text-[#E5E9F0]">
-      <div class="prose max-w-none text-base space-y-4 font-naskh leading-loose text-justify" set:html={item.content} />
+    <article class="bg-white dark:bg-[#1A2433] rounded-2xl p-6 sm:p-10 border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm">
+      <div class="academic-reader-content" set:html={item.content} />
     </article>
 
     <!-- صندوق التوثيق والاقتباس الأكاديمي التفاعلي (Interactive Citation Box) -->

@@ -29,9 +29,7 @@ if (!item || item.type !== 'educational') {
     </header>
 
     <div class="bg-white dark:bg-[#1A2433] rounded-2xl p-6 sm:p-10 border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm">
-      <div class="prose max-w-none text-base leading-relaxed text-[#151C24] dark:text-[#E5E9F0]">
-        <div set:html={item.content} />
-      </div>
+      <div class="academic-reader-content" set:html={item.content} />
     </div>
 
     <div class="mt-8 flex justify-between text-xs text-[#5A6578]">

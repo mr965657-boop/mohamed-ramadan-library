@@ -247,27 +247,22 @@ const categories = await getCategories();
           </div>
         </div>
 
-        <!-- محرر المحتوى الكامل المتطور مع التنسيق التلقائي والمعاينة -->
-        <div>
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-            <label class="block text-xs font-bold text-[#143D33]">
-              متن المحتوى الكامل (للمقالات والبحوث والنصوص)
+        <!-- المحرر المرئي التفاعلي المباشر (Visual Live WYSIWYG Editor) -->
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label class="block text-xs font-bold text-[#143D33] flex items-center gap-1.5">
+              <span>✍️</span>
+              <span>محرر المقال التفاعلي المباشر (اكتب أو الصق وسيتم التنسيق البصري فوراً)</span>
             </label>
             <div class="flex items-center gap-2">
-              <button
-                type="button"
-                id="btn-auto-format"
-                class="px-3 py-1 bg-gradient-to-r from-[#B8924A] to-[#8F6B27] hover:from-[#A5803B] hover:to-[#7E5D1E] text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
-                title="تنسيق المقال تلقائياً (العناوين، الفقرات، الاقتباسات، القوائم، تنظيف كود وورد)"
-              >
-                <span>✨</span>
-                <span>تنسيق المقال تلقائياً</span>
-              </button>
+              <span id="editor-auto-badge" class="px-2.5 py-0.5 rounded-full text-[11px] bg-green-100 text-green-800 font-bold border border-green-200">
+                ⚡ التنسيق التلقائي عند اللصق مفعّل
+              </span>
               <button
                 type="button"
                 id="btn-auto-excerpt"
-                class="px-2.5 py-1 bg-white hover:bg-gray-100 text-[#143D33] text-[11px] font-bold rounded-lg border border-[#E2DCD0] flex items-center gap-1 transition-all cursor-pointer"
-                title="استخراج النبذة والملخص تلقائياً من أول فقرة في المقال"
+                class="px-2.5 py-1 bg-white hover:bg-gray-100 text-[#143D33] text-[11px] font-bold rounded-lg border border-[#E2DCD0] flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+                title="استخراج النبذة والملخص تلقائياً من المقال"
               >
                 <span>⚡</span>
                 <span>توليد نبذة تلقائية</span>
@@ -275,43 +270,83 @@ const categories = await getCategories();
             </div>
           </div>
 
-          <div class="flex flex-wrap items-center justify-between gap-1.5 p-2 bg-[#FAF7F0] border border-[#E2DCD0] rounded-t-lg text-xs">
+          <!-- شريط أدوات التنسيق البصري الفوري (Visual Toolbar) -->
+          <div class="flex flex-wrap items-center justify-between gap-1.5 p-2 bg-[#FAF7F0] border border-[#E2DCD0] rounded-t-xl text-xs select-none">
             <div class="flex flex-wrap items-center gap-1">
-              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded font-bold text-xs" data-tag="h2">H2 عنوان رئيسي</button>
-              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded font-bold text-xs" data-tag="h3">H3 عنوان فرعي</button>
-              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded text-xs" data-tag="p">فقرة</button>
-              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded font-bold text-xs" data-tag="bold">عريض</button>
-              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded italic text-xs" data-tag="quote">اقتباس</button>
-              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded text-xs" data-tag="ul">• قائمة</button>
-              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded text-xs text-red-600" data-tag="clean">🧹 إزالة الوسوم</button>
-            </div>
-
-            <div class="flex items-center gap-1">
               <button
                 type="button"
-                id="btn-toggle-preview"
-                class="px-3 py-1 bg-white hover:bg-[#143D33] hover:text-white border border-[#E2DCD0] rounded text-xs font-bold text-[#143D33] transition-all cursor-pointer"
+                id="btn-auto-format"
+                class="px-3 py-1 bg-gradient-to-r from-[#B8924A] to-[#8F6B27] hover:from-[#A5803B] hover:to-[#7E5D1E] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1 cursor-pointer"
+                title="إعادة تنسيق كل النص داخل المربع وتحويل العناوين والاقتباسات تلقائياً"
               >
-                👁️ معاينة حية للمقال
+                <span>✨</span>
+                <span>تنسيق المقال بالكامل تلقائياً</span>
+              </button>
+
+              <div class="h-4 w-[1px] bg-gray-300 mx-1"></div>
+
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-emerald-50 text-[#143D33] border border-gray-200 rounded font-bold text-xs" data-command="h2" title="تحويل السطر إلى عنوان رئيسي فخم مع شريط مذهب">
+                H2 عنوان رئيسي
+              </button>
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-blue-50 text-[#1B365D] border border-gray-200 rounded font-bold text-xs" data-command="h3" title="تحويل السطر إلى عنوان فرعي">
+                H3 عنوان فرعي
+              </button>
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-gray-50 border border-gray-200 rounded text-xs" data-command="p" title="نص فقرة عادية">
+                فقرة عادية
+              </button>
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-gray-50 border border-gray-200 rounded font-bold text-xs" data-command="bold" title="خط عريض">
+                <b>B عريض</b>
+              </button>
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-900 border border-gray-200 rounded text-xs" data-command="quote" title="صندوق اقتباس تراثي مذهب">
+                ❝ صندوق اقتباس
+              </button>
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-gray-50 border border-gray-200 rounded text-xs" data-command="ul" title="قائمة نقطية">
+                • قائمة نقطية
+              </button>
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-gray-50 border border-gray-200 rounded text-xs" data-command="ol" title="قائمة رقمية">
+                1. مرقمة
+              </button>
+              <button type="button" class="tool-btn px-2.5 py-1 bg-white hover:bg-gray-50 border border-gray-200 rounded text-xs" data-command="divider" title="خط فاصل مذهب">
+                ⚜️ فاصل
+              </button>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button
+                type="button"
+                id="btn-toggle-code"
+                class="px-2.5 py-1 bg-white hover:bg-gray-100 border border-gray-200 rounded text-[11px] font-mono text-gray-600 cursor-pointer"
+                title="عرض أو تعديل كود HTML المباشر"
+              >
+                &lt;/&gt; كود
+              </button>
+              <button
+                type="button"
+                class="tool-btn px-2 py-1 bg-white hover:bg-red-50 text-red-600 border border-gray-200 rounded text-xs cursor-pointer"
+                data-command="clean"
+                title="مسح كافة التنسيقات والعودة لنص خام"
+              >
+                🧹 تنظيف
               </button>
             </div>
           </div>
 
-          <!-- مساحة التحرير -->
+          <!-- مساحة التحرير المرئي المباشر (WYSIWYG) -->
+          <div
+            id="visual-editor"
+            contenteditable="true"
+            class="academic-reader-content min-h-[380px] max-h-[700px] overflow-y-auto p-6 sm:p-8 bg-white border-x border-b border-[#E2DCD0] rounded-b-xl focus:outline-none focus:ring-2 focus:ring-[#143D33]/20 shadow-inner"
+            placeholder="انسخ أي مقال أو محاضرة من الوورد أو المتصفح والصقها هنا مباشرة (Ctrl + V)... سيتم تنسيقها وفصل العناوين والفقرات تلقائياً!"
+          ></div>
+
+          <!-- مساحة كود HTML البديلة (مخفية وتظهر عند الضغط على زر الكود) -->
           <textarea
-            id="content-area"
-            name="content"
-            rows="10"
-            placeholder="انسخ أي مقال أو دراسة من الوورد أو المتصفح والصقها هنا، ثم اضغط '✨ تنسيق المقال تلقائياً' لتنسيقها فوراً..."
-            class="w-full px-3.5 py-3 text-xs rounded-b-lg border-x border-b border-[#E2DCD0] font-naskh leading-relaxed"
+            id="code-editor"
+            class="hidden w-full min-h-[380px] p-4 font-mono text-xs text-gray-800 bg-gray-50 border-x border-b border-[#E2DCD0] rounded-b-xl focus:outline-none leading-relaxed"
           ></textarea>
 
-          <!-- شاشة المعاينة الحية للمقال -->
-          <div
-            id="preview-area"
-            class="hidden w-full p-5 text-sm rounded-b-lg border-x border-b border-[#E2DCD0] bg-white font-naskh leading-relaxed min-h-[220px] overflow-y-auto max-h-[500px]"
-          >
-          </div>
+          <!-- حقل النموذج الحقيقي الذي يُرسل إلى الخادم -->
+          <input type="hidden" id="content-input" name="content" value="" />
         </div>
 
         <!-- الكلمات الدلالية والوسوم -->
@@ -660,43 +695,104 @@ const categories = await getCategories();
     return output.join('\n');
   }
 
-  // 2. ربط عناصر الواجهة والمحرر
-  const contentArea = document.getElementById('content-area');
-  const previewArea = document.getElementById('preview-area');
+  // 2. ربط المحرر المرئي التفاعلي المباشر (Visual Live Editor)
+  const visualEditor = document.getElementById('visual-editor');
+  const codeEditor = document.getElementById('code-editor');
+  const contentInput = document.getElementById('content-input');
   const btnAutoFormat = document.getElementById('btn-auto-format');
   const btnAutoExcerpt = document.getElementById('btn-auto-excerpt');
-  const btnTogglePreview = document.getElementById('btn-toggle-preview');
-  let isPreviewMode = false;
+  const btnToggleCode = document.getElementById('btn-toggle-code');
+  let isCodeView = false;
 
-  // زر التنسيق التلقائي
-  if (btnAutoFormat && contentArea) {
+  function syncContent() {
+    if (isCodeView && codeEditor) {
+      if (contentInput) contentInput.value = codeEditor.value;
+      if (visualEditor) visualEditor.innerHTML = codeEditor.value;
+    } else if (visualEditor) {
+      if (contentInput) contentInput.value = visualEditor.innerHTML;
+      if (codeEditor) codeEditor.value = visualEditor.innerHTML;
+    }
+  }
+
+  if (visualEditor) {
+    visualEditor.addEventListener('input', syncContent);
+
+    // سحر التنسيق التلقائي اللحظي عند اللصق
+    visualEditor.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData('text/plain');
+      if (!text || !text.trim()) return;
+
+      const formatted = autoFormatArticle(text);
+      document.execCommand('insertHTML', false, formatted);
+      syncContent();
+
+      const badge = document.getElementById('editor-auto-badge');
+      if (badge) {
+        badge.textContent = '✨ تم تنسيق النص الملصوق آلياً وبأعلى معايير الراحة!';
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] bg-emerald-600 text-white font-bold shadow animate-pulse';
+        setTimeout(() => {
+          badge.textContent = '⚡ التنسيق التلقائي عند اللصق مفعّل';
+          badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] bg-green-100 text-green-800 font-bold border border-green-200';
+        }, 3500);
+      }
+    });
+  }
+
+  if (codeEditor) {
+    codeEditor.addEventListener('input', syncContent);
+  }
+
+  // زر تنسيق المقال بالكامل تلقائياً
+  if (btnAutoFormat && visualEditor) {
     btnAutoFormat.addEventListener('click', () => {
-      const raw = contentArea.value;
-      if (!raw.trim()) {
-        alert('يرجى لصق أو كتابة نص المقال أولاً في المربع!');
+      const rawText = visualEditor.innerText || visualEditor.textContent || '';
+      if (!rawText.trim()) {
+        alert('يرجى كتابة أو لصق نص المقال أولاً في المربع!');
         return;
       }
-      contentArea.value = autoFormatArticle(raw);
-      if (previewArea) previewArea.innerHTML = contentArea.value;
+      visualEditor.innerHTML = autoFormatArticle(rawText);
+      syncContent();
+
       btnAutoFormat.classList.add('bg-green-700');
-      btnAutoFormat.innerHTML = '<span>✓</span> <span>تم التنسيق بنجاح!</span>';
+      btnAutoFormat.innerHTML = '<span>✓</span> <span>تم التنسيق البصري بنجاح!</span>';
       setTimeout(() => {
         btnAutoFormat.classList.remove('bg-green-700');
-        btnAutoFormat.innerHTML = '<span>✨</span> <span>تنسيق المقال تلقائياً</span>';
+        btnAutoFormat.innerHTML = '<span>✨</span> <span>تنسيق المقال بالكامل تلقائياً</span>';
       }, 2000);
     });
   }
 
-  // زر استخراج النبذة تلقائياً
-  if (btnAutoExcerpt && contentArea) {
+  // زر التبديل لكود HTML المباشر
+  if (btnToggleCode && visualEditor && codeEditor) {
+    btnToggleCode.addEventListener('click', () => {
+      isCodeView = !isCodeView;
+      if (isCodeView) {
+        codeEditor.value = visualEditor.innerHTML;
+        visualEditor.classList.add('hidden');
+        codeEditor.classList.remove('hidden');
+        btnToggleCode.textContent = '👁️ العودة للمحرر المرئي';
+        btnToggleCode.classList.add('bg-[#143D33]', 'text-white');
+      } else {
+        visualEditor.innerHTML = codeEditor.value;
+        codeEditor.classList.add('hidden');
+        visualEditor.classList.remove('hidden');
+        btnToggleCode.textContent = '</> كود';
+        btnToggleCode.classList.remove('bg-[#143D33]', 'text-white');
+      }
+      syncContent();
+    });
+  }
+
+  // توليد نبذة تلقائية
+  if (btnAutoExcerpt && visualEditor) {
     btnAutoExcerpt.addEventListener('click', () => {
-      const raw = contentArea.value;
-      if (!raw.trim()) {
+      const textOnly = (visualEditor.innerText || visualEditor.textContent || '').replace(/\s+/g, ' ').trim();
+      if (!textOnly) {
         alert('يرجى كتابة أو لصق المقال أولاً لاستخراج النبذة منه!');
         return;
       }
-      const textOnly = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-      const firstChunk = textOnly.slice(0, 220);
+      const firstChunk = textOnly.slice(0, 240);
       const lastDot = firstChunk.lastIndexOf('.');
       const cleanSummary = (lastDot > 80 ? firstChunk.slice(0, lastDot + 1) : firstChunk) + '...';
 
@@ -712,44 +808,43 @@ const categories = await getCategories();
     });
   }
 
-  // زر التبديل للمعاينة الحية
-  if (btnTogglePreview && contentArea && previewArea) {
-    btnTogglePreview.addEventListener('click', () => {
-      isPreviewMode = !isPreviewMode;
-      if (isPreviewMode) {
-        previewArea.innerHTML = contentArea.value || '<p class="text-gray-400 italic">لا يوجد محتوى للمعاينة...</p>';
-        contentArea.classList.add('hidden');
-        previewArea.classList.remove('hidden');
-        btnTogglePreview.innerHTML = '✏️ العودة للتحرير';
-        btnTogglePreview.classList.add('bg-[#143D33]', 'text-white');
-      } else {
-        contentArea.classList.remove('hidden');
-        previewArea.classList.add('hidden');
-        btnTogglePreview.innerHTML = '👁️ معاينة حية للمقال';
-        btnTogglePreview.classList.remove('bg-[#143D33]', 'text-white');
-      }
-    });
-  }
-
-  // أزرار التنسيق اليدوي (format-btn)
-  document.querySelectorAll('.format-btn').forEach(btn => {
+  // أزرار شريط الأدوات المرئية (Visual Tools)
+  document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (!contentArea) return;
-      const tag = btn.getAttribute('data-tag');
-      const start = contentArea.selectionStart;
-      const end = contentArea.selectionEnd;
-      const selectedText = contentArea.value.substring(start, end) || 'النص المختار';
-      let replacement = '';
+      if (!visualEditor) return;
+      visualEditor.focus();
+      const cmd = btn.getAttribute('data-command');
 
-      if (tag === 'h2') replacement = `\n<h2 class="text-xl font-bold font-amiri text-[#143D33] mt-6 mb-3 border-r-4 border-[#B8924A] pr-3">${selectedText}</h2>\n`;
-      else if (tag === 'h3') replacement = `\n<h3 class="text-lg font-bold font-amiri text-[#1B365D] mt-4 mb-2">${selectedText}</h3>\n`;
-      else if (tag === 'p') replacement = `\n<p class="leading-relaxed mb-4 text-[#2C3E50]">${selectedText}</p>\n`;
-      else if (tag === 'bold') replacement = `<strong>${selectedText}</strong>`;
-      else if (tag === 'quote') replacement = `\n<blockquote class="border-r-4 border-[#B8924A] bg-[#FAF7F0] p-4 my-4 rounded-l italic font-amiri text-base text-[#1B365D]">${selectedText}</blockquote>\n`;
-      else if (tag === 'ul') replacement = `\n<ul class="list-disc pr-6 space-y-1.5 my-3 text-sm text-[#2C3E50]">\n  <li>${selectedText}</li>\n</ul>\n`;
-      else if (tag === 'clean') replacement = selectedText.replace(/<[^>]+>/g, '');
+      if (cmd === 'bold') {
+        document.execCommand('bold', false, null);
+      } else if (cmd === 'ul') {
+        document.execCommand('insertUnorderedList', false, null);
+      } else if (cmd === 'ol') {
+        document.execCommand('insertOrderedList', false, null);
+      } else if (cmd === 'divider') {
+        document.execCommand('insertHTML', false, '<hr class="my-8 border-t-2 border-dashed border-[#B8924A]/40" />');
+      } else if (cmd === 'clean') {
+        const plain = visualEditor.innerText || visualEditor.textContent || '';
+        visualEditor.innerText = plain;
+      } else if (cmd === 'h2' || cmd === 'h3' || cmd === 'p' || cmd === 'quote') {
+        const sel = window.getSelection();
+        let selectedText = sel ? sel.toString().trim() : '';
+        if (!selectedText) selectedText = 'عنوان جديد';
 
-      contentArea.setRangeText(replacement, start, end, 'select');
+        let replacement = '';
+        if (cmd === 'h2') {
+          replacement = `<h2 class="text-2xl font-bold font-amiri text-[#143D33] mt-10 mb-4 border-r-4 border-[#B8924A] pr-3.5 leading-snug">${selectedText}</h2>`;
+        } else if (cmd === 'h3') {
+          replacement = `<h3 class="text-xl font-bold font-amiri text-[#1B365D] mt-8 mb-3 pr-2">${selectedText}</h3>`;
+        } else if (cmd === 'p') {
+          replacement = `<p class="leading-[2.2] mb-6 text-[#1E293B] text-[18px] font-naskh">${selectedText}</p>`;
+        } else if (cmd === 'quote') {
+          replacement = `<blockquote class="border-r-4 border-[#B8924A] bg-[#FAF7F0] p-5 my-6 rounded-l font-amiri text-lg text-[#1B365D] leading-relaxed shadow-sm not-italic">${selectedText}</blockquote>`;
+        }
+        document.execCommand('insertHTML', false, replacement);
+      }
+
+      syncContent();
     });
   });
 

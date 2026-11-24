@@ -169,3 +169,26 @@
   margin-bottom: 0.65rem;
   font-style: normal !important;
 }
+
+.academic-reader-content em,
+.academic-reader-content i {
+  font-style: normal !important; /* منع الميلان نهائياً في الحروف العربية */
+  font-weight: 600;
+  color: #854D0E;
+}
+
+.dark .academic-reader-content em,
+.dark .academic-reader-content i {
+  color: #FDE047;
+}
+
+.academic-reader-content strong,
+.academic-reader-content b {
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.dark .academic-reader-content strong,
+.dark .academic-reader-content b {
+  color: #F8FAFC;
+}
