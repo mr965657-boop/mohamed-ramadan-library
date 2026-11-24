@@ -246,24 +246,71 @@ if (!item) {
           </div>
         </div>
 
-        <!-- محرر المحتوى الكامل -->
+        <!-- محرر المحتوى الكامل المتطور مع التنسيق التلقائي والمعاينة -->
         <div>
-          <label class="block text-xs font-bold text-[#143D33] mb-1.5">
-            متن المحتوى الكامل
-          </label>
-          <div class="flex items-center gap-1.5 p-2 bg-[#FAF7F0] border border-[#E2DCD0] rounded-t-lg text-xs">
-            <button type="button" onclick="formatDoc('h2')" class="px-2 py-1 bg-white border rounded font-bold">H2</button>
-            <button type="button" onclick="formatDoc('h3')" class="px-2 py-1 bg-white border rounded font-bold">H3</button>
-            <button type="button" onclick="formatDoc('p')" class="px-2 py-1 bg-white border rounded">فقرة</button>
-            <button type="button" onclick="formatDoc('bold')" class="px-2 py-1 bg-white border rounded font-bold">عريض</button>
-            <button type="button" onclick="formatDoc('quote')" class="px-2 py-1 bg-white border rounded italic">اقتباس</button>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+            <label class="block text-xs font-bold text-[#143D33]">
+              متن المحتوى الكامل (للمقالات والبحوث والنصوص)
+            </label>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="btn-auto-format"
+                class="px-3 py-1 bg-gradient-to-r from-[#B8924A] to-[#8F6B27] hover:from-[#A5803B] hover:to-[#7E5D1E] text-white text-[11px] font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                title="تنسيق المقال تلقائياً (العناوين، الفقرات، الاقتباسات، القوائم، تنظيف كود وورد)"
+              >
+                <span>✨</span>
+                <span>تنسيق المقال تلقائياً</span>
+              </button>
+              <button
+                type="button"
+                id="btn-auto-excerpt"
+                class="px-2.5 py-1 bg-white hover:bg-gray-100 text-[#143D33] text-[11px] font-bold rounded-lg border border-[#E2DCD0] flex items-center gap-1 transition-all cursor-pointer"
+                title="استخراج النبذة والملخص تلقائياً من أول فقرة في المقال"
+              >
+                <span>⚡</span>
+                <span>توليد نبذة تلقائية</span>
+              </button>
+            </div>
           </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-1.5 p-2 bg-[#FAF7F0] border border-[#E2DCD0] rounded-t-lg text-xs">
+            <div class="flex flex-wrap items-center gap-1">
+              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded font-bold text-xs" data-tag="h2">H2 عنوان رئيسي</button>
+              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded font-bold text-xs" data-tag="h3">H3 عنوان فرعي</button>
+              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded text-xs" data-tag="p">فقرة</button>
+              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded font-bold text-xs" data-tag="bold">عريض</button>
+              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded italic text-xs" data-tag="quote">اقتباس</button>
+              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded text-xs" data-tag="ul">• قائمة</button>
+              <button type="button" class="format-btn px-2.5 py-1 bg-white hover:bg-gray-50 border rounded text-xs text-red-600" data-tag="clean">🧹 إزالة الوسوم</button>
+            </div>
+
+            <div class="flex items-center gap-1">
+              <button
+                type="button"
+                id="btn-toggle-preview"
+                class="px-3 py-1 bg-white hover:bg-[#143D33] hover:text-white border border-[#E2DCD0] rounded text-xs font-bold text-[#143D33] transition-all cursor-pointer"
+              >
+                👁️ معاينة حية للمقال
+              </button>
+            </div>
+          </div>
+
+          <!-- مساحة التحرير -->
           <textarea
             id="content-area"
             name="content"
-            rows="8"
+            rows="10"
+            placeholder="اكتب أو الصق متن المقال هنا ثم اضغط '✨ تنسيق المقال تلقائياً'..."
             class="w-full px-3.5 py-3 text-xs rounded-b-lg border-x border-b border-[#E2DCD0] font-naskh leading-relaxed"
           >{item.content || ''}</textarea>
+
+          <!-- شاشة المعاينة الحية للمقال -->
+          <div
+            id="preview-area"
+            class="hidden w-full p-5 text-sm rounded-b-lg border-x border-b border-[#E2DCD0] bg-white font-naskh leading-relaxed min-h-[220px] overflow-y-auto max-h-[500px]"
+          >
+          </div>
         </div>
 
         <!-- الكلمات الدلالية والوسوم -->
@@ -341,6 +388,206 @@ if (!item) {
       }
     });
   }
+
+  // 1. محرك التنسيق التلقائي الذكي للمقالات والأبحاث
+  function autoFormatArticle(rawText) {
+    if (!rawText || !rawText.trim()) return '';
+
+    let clean = rawText
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '');
+
+    // إذا كان كود HTML منسوخ من Word، يتم تطهيره
+    if (/<[a-z][\s\S]*>/i.test(clean)) {
+      clean = clean
+        .replace(/<(\/?)span[^>]*>/gi, '')
+        .replace(/class="Mso[^"]*"/gi, '')
+        .replace(/style="[^"]*"/gi, '')
+        .replace(/<o:p>[\s\S]*?<\/o:p>/gi, '')
+        .replace(/<font[^>]*>/gi, '')
+        .replace(/<\/font>/gi, '');
+      
+      if (/<(p|h2|h3|h4|blockquote|ul|ol|li)[^>]*>/i.test(clean)) {
+        return clean.trim();
+      }
+    }
+
+    const lines = clean.split(/\r?\n/).map(l => l.trim());
+    const output = [];
+    let currentList = [];
+    let isOrderedList = false;
+
+    function flushList() {
+      if (currentList.length > 0) {
+        const tag = isOrderedList ? 'ol' : 'ul';
+        const cls = isOrderedList 
+          ? 'list-decimal pr-6 space-y-1.5 my-3 text-sm text-[#2C3E50]' 
+          : 'list-disc pr-6 space-y-1.5 my-3 text-sm text-[#2C3E50]';
+        output.push(`<${tag} class="${cls}">` + currentList.map(li => `<li>${li}</li>`).join('') + `</${tag}>`);
+        currentList = [];
+      }
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line) {
+        flushList();
+        continue;
+      }
+
+      // Markdown Headers
+      if (line.startsWith('### ')) {
+        flushList();
+        output.push(`<h3 class="text-base font-bold font-amiri text-[#1B365D] mt-5 mb-2">${line.slice(4).trim()}</h3>`);
+        continue;
+      }
+      if (line.startsWith('## ') || line.startsWith('# ')) {
+        flushList();
+        const content = line.replace(/^#+\s*/, '').trim();
+        output.push(`<h2 class="text-lg sm:text-xl font-bold font-amiri text-[#143D33] mt-6 mb-3 border-r-4 border-[#B8924A] pr-3">${content}</h2>`);
+        continue;
+      }
+
+      // عناوين الأقسام الأكاديمية التراثية والحديثة
+      const arabicHeadingRegex = /^(المقدمة|التمهيد|المبحث الأول|المبحث الثاني|المبحث الثالث|المبحث الرابع|المطلب الأول|المطلب الثاني|المطلب الثالث|الفصل الأول|الفصل الثاني|الفصل الثالث|الخاتمة|النتائج|التوصيات|الخلاصة|المراجع|ثبت المصادر والمراجع|أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً)\s*[:\-\.]?\s*(.*)$/i;
+      const headingMatch = line.match(arabicHeadingRegex);
+      if (headingMatch && line.length < 120) {
+        flushList();
+        output.push(`<h2 class="text-lg sm:text-xl font-bold font-amiri text-[#143D33] mt-6 mb-3 border-r-4 border-[#B8924A] pr-3">${line}</h2>`);
+        continue;
+      }
+
+      // الاقتباسات والأحاديث والآيات
+      if (
+        line.startsWith('>') || 
+        (line.startsWith('«') && line.endsWith('»')) || 
+        (line.startsWith('"') && line.endsWith('"')) ||
+        /^(قال|روي|وفي الحديث|جاء في الأثر|يقول الإمام|يقول الكاتب)\s*[:\-]/i.test(line)
+      ) {
+        flushList();
+        const quoteText = line.replace(/^>\s*/, '').replace(/^[«"]|[»"]$/g, '').trim();
+        output.push(`<blockquote class="border-r-4 border-[#B8924A] bg-[#FAF7F0] p-4 my-4 rounded-l italic font-amiri text-base text-[#1B365D] leading-relaxed shadow-sm">${quoteText}</blockquote>`);
+        continue;
+      }
+
+      // قوائم نقطية
+      if (/^[\-\*•—]\s+/.test(line)) {
+        if (currentList.length > 0 && isOrderedList) flushList();
+        isOrderedList = false;
+        currentList.push(line.replace(/^[\-\*•—]\s+/, '').trim());
+        continue;
+      }
+
+      // قوائم رقمية
+      if (/^\d+[\.\-\)]\s+/.test(line)) {
+        if (currentList.length > 0 && !isOrderedList) flushList();
+        isOrderedList = true;
+        currentList.push(line.replace(/^\d+[\.\-\)]\s+/, '').trim());
+        continue;
+      }
+
+      // فقرة عادية
+      flushList();
+      output.push(`<p class="leading-relaxed mb-4 text-[#2C3E50] text-sm font-naskh">${line}</p>`);
+    }
+
+    flushList();
+    return output.join('\n');
+  }
+
+  // 2. ربط عناصر الواجهة والمحرر
+  const contentArea = document.getElementById('content-area');
+  const previewArea = document.getElementById('preview-area');
+  const btnAutoFormat = document.getElementById('btn-auto-format');
+  const btnAutoExcerpt = document.getElementById('btn-auto-excerpt');
+  const btnTogglePreview = document.getElementById('btn-toggle-preview');
+  let isPreviewMode = false;
+
+  // زر التنسيق التلقائي
+  if (btnAutoFormat && contentArea) {
+    btnAutoFormat.addEventListener('click', () => {
+      const raw = contentArea.value;
+      if (!raw.trim()) {
+        alert('يرجى لصق أو كتابة نص المقال أولاً في المربع!');
+        return;
+      }
+      contentArea.value = autoFormatArticle(raw);
+      if (previewArea) previewArea.innerHTML = contentArea.value;
+      btnAutoFormat.classList.add('bg-green-700');
+      btnAutoFormat.innerHTML = '<span>✓</span> <span>تم التنسيق بنجاح!</span>';
+      setTimeout(() => {
+        btnAutoFormat.classList.remove('bg-green-700');
+        btnAutoFormat.innerHTML = '<span>✨</span> <span>تنسيق المقال تلقائياً</span>';
+      }, 2000);
+    });
+  }
+
+  // زر استخراج النبذة تلقائياً
+  if (btnAutoExcerpt && contentArea) {
+    btnAutoExcerpt.addEventListener('click', () => {
+      const raw = contentArea.value;
+      if (!raw.trim()) {
+        alert('يرجى كتابة أو لصق المقال أولاً لاستخراج النبذة منه!');
+        return;
+      }
+      const textOnly = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      const firstChunk = textOnly.slice(0, 220);
+      const lastDot = firstChunk.lastIndexOf('.');
+      const cleanSummary = (lastDot > 80 ? firstChunk.slice(0, lastDot + 1) : firstChunk) + '...';
+
+      const excerptInput = document.querySelector('textarea[name="excerpt"]');
+      const abstractInput = document.querySelector('textarea[name="abstract"]');
+      if (excerptInput && !excerptInput.value.trim()) excerptInput.value = cleanSummary;
+      if (abstractInput && !abstractInput.value.trim()) abstractInput.value = cleanSummary;
+
+      btnAutoExcerpt.innerHTML = '<span>✓</span> <span>تم توليد النبذة!</span>';
+      setTimeout(() => {
+        btnAutoExcerpt.innerHTML = '<span>⚡</span> <span>توليد نبذة تلقائية</span>';
+      }, 2000);
+    });
+  }
+
+  // زر التبديل للمعاينة الحية
+  if (btnTogglePreview && contentArea && previewArea) {
+    btnTogglePreview.addEventListener('click', () => {
+      isPreviewMode = !isPreviewMode;
+      if (isPreviewMode) {
+        previewArea.innerHTML = contentArea.value || '<p class="text-gray-400 italic">لا يوجد محتوى للمعاينة...</p>';
+        contentArea.classList.add('hidden');
+        previewArea.classList.remove('hidden');
+        btnTogglePreview.innerHTML = '✏️ العودة للتحرير';
+        btnTogglePreview.classList.add('bg-[#143D33]', 'text-white');
+      } else {
+        contentArea.classList.remove('hidden');
+        previewArea.classList.add('hidden');
+        btnTogglePreview.innerHTML = '👁️ معاينة حية للمقال';
+        btnTogglePreview.classList.remove('bg-[#143D33]', 'text-white');
+      }
+    });
+  }
+
+  // أزرار التنسيق اليدوي (format-btn)
+  document.querySelectorAll('.format-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!contentArea) return;
+      const tag = btn.getAttribute('data-tag');
+      const start = contentArea.selectionStart;
+      const end = contentArea.selectionEnd;
+      const selectedText = contentArea.value.substring(start, end) || 'النص المختار';
+      let replacement = '';
+
+      if (tag === 'h2') replacement = `\n<h2 class="text-xl font-bold font-amiri text-[#143D33] mt-6 mb-3 border-r-4 border-[#B8924A] pr-3">${selectedText}</h2>\n`;
+      else if (tag === 'h3') replacement = `\n<h3 class="text-lg font-bold font-amiri text-[#1B365D] mt-4 mb-2">${selectedText}</h3>\n`;
+      else if (tag === 'p') replacement = `\n<p class="leading-relaxed mb-4 text-[#2C3E50]">${selectedText}</p>\n`;
+      else if (tag === 'bold') replacement = `<strong>${selectedText}</strong>`;
+      else if (tag === 'quote') replacement = `\n<blockquote class="border-r-4 border-[#B8924A] bg-[#FAF7F0] p-4 my-4 rounded-l italic font-amiri text-base text-[#1B365D]">${selectedText}</blockquote>\n`;
+      else if (tag === 'ul') replacement = `\n<ul class="list-disc pr-6 space-y-1.5 my-3 text-sm text-[#2C3E50]">\n  <li>${selectedText}</li>\n</ul>\n`;
+      else if (tag === 'clean') replacement = selectedText.replace(/<[^>]+>/g, '');
+
+      contentArea.setRangeText(replacement, start, end, 'select');
+    });
+  });
 
   const form = document.getElementById('edit-item-form');
   const msgBox = document.getElementById('form-msg');
