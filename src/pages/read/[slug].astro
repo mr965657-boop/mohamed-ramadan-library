@@ -19,7 +19,7 @@ if (!book || (!hasPdf && !hasText)) {
 
 const isRTL = lang === 'ar';
 const hasTOC = book.table_of_contents && book.table_of_contents.length > 0;
-// الوضع الافتراضي: القراءة النصية إذا توفرت، وإلا نسخة الـ PDF
+// الوضع الافتراضي: القراءة النصية إذا توفرت لسرعتها الفائقة، وإلا عارض الـ PDF
 const defaultMode = hasText ? 'text' : 'pdf';
 ---
 
@@ -42,12 +42,7 @@ const defaultMode = hasText ? 'text' : 'pdf';
       }
       #viewer-container {
         height: calc(100vh - 60px);
-        overflow: auto;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 20px 10px;
-        box-sizing: border-box;
+        overflow: hidden;
         background-color: #1F2937;
       }
       #pdf-canvas {
@@ -108,29 +103,29 @@ const defaultMode = hasText ? 'text' : 'pdf';
         </div>
       </div>
 
-      <!-- محول الوضع: قراءة نصية مريحة vs نسخة PDF (إن توفر الاثنان) -->
+      <!-- محول الوضع: قراءة نصية فورية vs عارض الـ PDF (إن توفر الاثنان) -->
       {hasText && hasPdf && (
         <div class="flex items-center bg-white/10 p-1 rounded-xl border border-white/20 text-xs font-bold">
           <button
             type="button"
             id="btn-mode-text"
-            class="px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer bg-white text-[#143D33] shadow-sm"
+            class={`px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${defaultMode === 'text' ? 'bg-white text-[#143D33] shadow-sm' : 'text-white/80 hover:text-white'}`}
           >
-            <span>📖</span>
-            <span class="hidden sm:inline">{isRTL ? 'قراءة نصية مريحة' : 'Digital Reader'}</span>
+            <span>⚡</span>
+            <span class="hidden sm:inline">{isRTL ? 'قراءة نصية فورية' : 'Digital Reader'}</span>
           </button>
           <button
             type="button"
             id="btn-mode-pdf"
-            class="px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer text-white/80 hover:text-white"
+            class={`px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${defaultMode === 'pdf' ? 'bg-white text-[#143D33] shadow-sm' : 'text-white/80 hover:text-white'}`}
           >
             <span>📄</span>
-            <span class="hidden sm:inline">{isRTL ? 'نسخة PDF المصورة' : 'PDF Viewer'}</span>
+            <span class="hidden sm:inline">{isRTL ? 'عارض الـ PDF السريع' : 'PDF Viewer'}</span>
           </button>
         </div>
       )}
 
-      <!-- أدوات التحكم في القراءة النصية (تظهر عند تفعيل الوضع النصي) -->
+      <!-- أدوات التحكم في القراءة النصية -->
       <div id="text-controls" class={`${defaultMode === 'text' ? 'flex' : 'hidden'} items-center gap-2 text-xs`}>
         <!-- اختيار حجم الخط للقراءة النصية -->
         <div class="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-lg border border-white/10 text-xs">
@@ -159,55 +154,31 @@ const defaultMode = hasText ? 'text' : 'pdf';
         </button>
       </div>
 
-      <!-- أدوات التحكم في ملف الـ PDF (تظهر عند تفعيل وضع الـ PDF) -->
+      <!-- أدوات التحكم في ملف الـ PDF -->
       {hasPdf && (
         <div id="pdf-controls" class={`${defaultMode === 'pdf' ? 'flex' : 'hidden'} items-center gap-2 text-xs`}>
-          <!-- أزرار التنقل بين الصفحات -->
-          <div class="flex items-center gap-1">
-            <button
-              id="prev-page"
-              class="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 font-bold transition-colors disabled:opacity-40"
-              title="الصفحة السابقة"
-            >
-              {isRTL ? 'السابق' : 'Prev'}
-            </button>
-            <div class="flex items-center gap-1 font-sans">
-              <input
-                type="number"
-                id="page-num"
-                value="1"
-                min="1"
-                class="w-10 sm:w-12 text-center py-1 bg-white/10 border border-white/20 rounded text-white text-xs font-bold"
-              />
-              <span class="text-white/60">/</span>
-              <span id="page-count" class="text-white/80">--</span>
-            </div>
-            <button
-              id="next-page"
-              class="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 font-bold transition-colors disabled:opacity-40"
-              title="الصفحة التالية"
-            >
-              {isRTL ? 'التالي' : 'Next'}
-            </button>
-          </div>
-
-          <!-- أدوات التكبير -->
-          <div class="hidden lg:flex items-center gap-1 bg-white/10 p-1 rounded-lg">
-            <button id="zoom-out" class="px-2 py-0.5 hover:bg-white/10 rounded font-bold" title="تصغير">-</button>
-            <span id="zoom-text" class="text-[11px] font-sans px-1">100%</span>
-            <button id="zoom-in" class="px-2 py-0.5 hover:bg-white/10 rounded font-bold" title="تكبير">+</button>
-          </div>
+          <!-- زر التبديل بين العارض السريع وعارض الصفحات المخصص -->
+          <button
+            type="button"
+            id="btn-toggle-pdf-engine"
+            class="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white font-bold text-[11px] transition-colors flex items-center gap-1"
+            title="التبديل بين عارض المتصفح اللحظي وعارض الصفحات"
+          >
+            <span>🔄</span>
+            <span id="engine-btn-label">العارض المخصص</span>
+          </button>
 
           {book.allow_download && (
             <a
               href={book.file_url}
               download
-              class="hidden sm:inline-flex p-2 rounded bg-white/10 hover:bg-white/20 text-white"
+              class="p-2 rounded bg-white/10 hover:bg-white/20 text-white flex items-center gap-1 font-bold text-xs"
               title="تنزيل نسخة PDF"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
               </svg>
+              <span class="hidden md:inline">تحميل PDF</span>
             </a>
           )}
         </div>
@@ -215,7 +186,7 @@ const defaultMode = hasText ? 'text' : 'pdf';
 
     </header>
 
-    <!-- 1. منطقة القراءة النصية الأكاديمية الرقمية (Digital Reading Canvas) -->
+    <!-- 1. منطقة القراءة النصية الأكاديمية الفورية (Digital Reading Canvas) - تفتح في 0 ثانية -->
     {hasText && (
       <main
         id="text-reader-container"
@@ -227,7 +198,7 @@ const defaultMode = hasText ? 'text' : 'pdf';
           <div class="pb-8 mb-10 border-b border-[#B8924A]/30">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#143D33]/10 text-[#143D33] text-xs font-bold mb-3">
               <span>📖</span>
-              <span>{isRTL ? 'متن الكتاب والمنهج الأكاديمي' : 'Complete Digital Edition'}</span>
+              <span>{isRTL ? 'متن الكتاب والمنهج الأكاديمي (قراءة فورية خفيفة)' : 'Complete Digital Edition'}</span>
             </div>
             <h1 class="text-3xl sm:text-5xl font-amiri font-bold text-[#143D33] leading-tight">
               {book.title}
@@ -239,7 +210,7 @@ const defaultMode = hasText ? 'text' : 'pdf';
             </div>
           </div>
 
-          <!-- متن العمل המنسق بأعلى معايير الراحة للعين -->
+          <!-- متن العمل المنسق بأعلى معايير الراحة للعين -->
           <article id="text-reader-content" class="academic-reader-content">
             <div set:html={book.content} />
           </article>
@@ -263,17 +234,32 @@ const defaultMode = hasText ? 'text' : 'pdf';
       </main>
     )}
 
-    <!-- 2. منطقة عرض ملف الـ PDF (PDF Document Viewer) -->
+    <!-- 2. منطقة عرض ملف الـ PDF (PDF Document Viewer) بتقنية التدفق السريع -->
     {hasPdf && (
       <div
         id="viewer-container"
-        class={`${defaultMode === 'pdf' ? 'flex' : 'hidden'} relative`}
+        class={`${defaultMode === 'pdf' ? 'flex' : 'hidden'} relative w-full h-[calc(100vh-60px)] flex-col bg-[#1F2937]`}
       >
-        <div id="loading-indicator" class="text-white text-sm mt-20 flex flex-col items-center gap-3">
-          <div class="w-8 h-8 border-4 border-[#B8924A] border-t-transparent rounded-full animate-spin"></div>
-          <span>{isRTL ? 'جارٍ تهيئة صفحات الكتاب بدقة عالية...' : 'Loading book pages in high resolution...'}</span>
+        <!-- العارض السريع الفوري (Fast Native Streaming Engine) - يتدفق مباشرة دون انتظار تنزيل كامل الملف -->
+        <iframe
+          id="native-pdf-frame"
+          src={`${book.file_url}#toolbar=1&navpanes=0`}
+          class="w-full h-full border-0 bg-[#1F2937]"
+          title={book.title}
+          loading="eager"
+        ></iframe>
+
+        <!-- عارض الكانفاس المخصص (Custom Canvas Fallback مع عداد التحميل بالنسبة المئوية) -->
+        <div id="canvas-viewer-wrapper" class="hidden w-full h-full overflow-auto flex-col items-center p-4">
+          <div id="loading-indicator" class="text-white text-xs mt-16 flex flex-col items-center gap-3">
+            <div class="w-8 h-8 border-4 border-[#B8924A] border-t-transparent rounded-full animate-spin"></div>
+            <span id="load-status-text">{isRTL ? 'جارٍ تحميل صفحات الكتاب...' : 'Loading PDF pages...'}</span>
+            <div id="load-progress-bar-container" class="w-56 bg-white/20 h-2 rounded-full overflow-hidden hidden">
+              <div id="load-progress-fill" class="bg-[#B8924A] h-full transition-all duration-150" style="width: 0%;"></div>
+            </div>
+          </div>
+          <canvas id="pdf-canvas" class="hidden shadow-2xl rounded mt-4"></canvas>
         </div>
-        <canvas id="pdf-canvas" class="hidden"></canvas>
       </div>
     )}
 
@@ -329,7 +315,7 @@ const defaultMode = hasText ? 'text' : 'pdf';
         });
       }
 
-      // 2. التبديل بين وضع القراءة النصية ووضع الـ PDF
+      // 2. التبديل بين وضع القراءة النصية الفورية ووضع عارض الـ PDF
       const btnModeText = document.getElementById('btn-mode-text');
       const btnModePdf = document.getElementById('btn-mode-pdf');
       const viewerContainer = document.getElementById('viewer-container');
@@ -341,8 +327,10 @@ const defaultMode = hasText ? 'text' : 'pdf';
           textContainer.classList.remove('hidden');
           textContainer.classList.add('block');
           if (viewerContainer) viewerContainer.classList.add('hidden');
-          if (textControls) textControls.classList.remove('hidden');
-          if (textControls) textControls.classList.add('flex');
+          if (textControls) {
+            textControls.classList.remove('hidden');
+            textControls.classList.add('flex');
+          }
           if (pdfControls) pdfControls.classList.add('hidden');
 
           if (btnModeText) {
@@ -358,8 +346,10 @@ const defaultMode = hasText ? 'text' : 'pdf';
             textContainer.classList.remove('block');
             textContainer.classList.add('hidden');
           }
-          if (pdfControls) pdfControls.classList.remove('hidden');
-          if (pdfControls) pdfControls.classList.add('flex');
+          if (pdfControls) {
+            pdfControls.classList.remove('hidden');
+            pdfControls.classList.add('flex');
+          }
           if (textControls) {
             textControls.classList.remove('flex');
             textControls.classList.add('hidden');
@@ -389,122 +379,78 @@ const defaultMode = hasText ? 'text' : 'pdf';
         });
       }
 
-      // 4. تشغيل محرك PDF.js فقط في حال وجود ملف PDF
-      if (hasPdf && fileUrl) {
+      // 4. التبديل بين العارض السريع وعارض الكانفاس المخصص مع تتبع النسبة المئوية
+      const btnToggleEngine = document.getElementById('btn-toggle-pdf-engine');
+      const engineBtnLabel = document.getElementById('engine-btn-label');
+      const nativeFrame = document.getElementById('native-pdf-frame');
+      const canvasWrapper = document.getElementById('canvas-viewer-wrapper');
+      let isCanvasActive = false;
+      let pdfDocInstance = null;
+
+      if (btnToggleEngine && nativeFrame && canvasWrapper) {
+        btnToggleEngine.addEventListener('click', () => {
+          isCanvasActive = !isCanvasActive;
+          if (isCanvasActive) {
+            nativeFrame.classList.add('hidden');
+            canvasWrapper.classList.remove('hidden');
+            canvasWrapper.classList.add('flex');
+            if (engineBtnLabel) engineBtnLabel.textContent = 'العارض اللحظي ⚡';
+            initCanvasPdf();
+          } else {
+            canvasWrapper.classList.add('hidden');
+            canvasWrapper.classList.remove('flex');
+            nativeFrame.classList.remove('hidden');
+            if (engineBtnLabel) engineBtnLabel.textContent = 'العارض المخصص';
+          }
+        });
+      }
+
+      function initCanvasPdf() {
+        if (pdfDocInstance || !hasPdf || !fileUrl || typeof pdfjsLib === 'undefined') return;
+
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        let pdfDoc = null;
-        let pageNum = 1;
-        let pageRendering = false;
-        let pageNumPending = null;
-        let scale = window.innerWidth < 640 ? 0.85 : 1.25;
-
         const canvas = document.getElementById('pdf-canvas');
         const ctx = canvas ? canvas.getContext('2d') : null;
         const loader = document.getElementById('loading-indicator');
-        const pageNumInput = document.getElementById('page-num');
-        const pageCountSpan = document.getElementById('page-count');
-        const zoomText = document.getElementById('zoom-text');
-        const prevBtn = document.getElementById('prev-page');
-        const nextBtn = document.getElementById('next-page');
+        const statusText = document.getElementById('load-status-text');
+        const progressContainer = document.getElementById('load-progress-bar-container');
+        const progressFill = document.getElementById('load-progress-fill');
 
-        function renderPage(num) {
-          if (!pdfDoc || !canvas || !ctx) return;
-          pageRendering = true;
-          pdfDoc.getPage(num).then(function(page) {
-            const viewport = page.getViewport({ scale: scale });
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+        if (progressContainer) progressContainer.classList.remove('hidden');
 
-            const renderContext = {
-              canvasContext: ctx,
-              viewport: viewport
-            };
-            const renderTask = page.render(renderContext);
+        const loadingTask = pdfjsLib.getDocument({
+          url: fileUrl,
+          cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+          cMapPacked: true,
+        });
 
-            renderTask.promise.then(function() {
-              pageRendering = false;
-              if (loader) loader.classList.add('hidden');
-              canvas.classList.remove('hidden');
-
-              localStorage.setItem(`read_pos_${bookSlug}`, num.toString());
-
-              if (pageNumPending !== null) {
-                renderPage(pageNumPending);
-                pageNumPending = null;
-              }
-            });
-          });
-
-          if (pageNumInput) pageNumInput.value = num;
-          if (prevBtn) prevBtn.disabled = (num <= 1);
-          if (nextBtn) nextBtn.disabled = (num >= pdfDoc.numPages);
-        }
-
-        function queueRenderPage(num) {
-          if (pageRendering) {
-            pageNumPending = num;
-          } else {
-            renderPage(num);
+        loadingTask.onProgress = function(progress) {
+          if (progress.total > 0 && progressFill && statusText) {
+            const percent = Math.min(100, Math.round((progress.loaded / progress.total) * 100));
+            progressFill.style.width = `${percent}%`;
+            const loadedMB = (progress.loaded / (1024 * 1024)).toFixed(1);
+            const totalMB = (progress.total / (1024 * 1024)).toFixed(1);
+            statusText.textContent = `جارٍ تنزيل صفحات الكتاب: ${percent}% (${loadedMB}MB من ${totalMB}MB)`;
           }
-        }
+        };
 
-        if (prevBtn) {
-          prevBtn.addEventListener('click', () => {
-            if (pageNum <= 1) return;
-            pageNum--;
-            queueRenderPage(pageNum);
-          });
-        }
-
-        if (nextBtn) {
-          nextBtn.addEventListener('click', () => {
-            if (!pdfDoc || pageNum >= pdfDoc.numPages) return;
-            pageNum++;
-            queueRenderPage(pageNum);
-          });
-        }
-
-        if (pageNumInput) {
-          pageNumInput.addEventListener('change', function() {
-            let desired = parseInt(this.value);
-            if (pdfDoc && desired >= 1 && desired <= pdfDoc.numPages) {
-              pageNum = desired;
-              queueRenderPage(pageNum);
-            } else {
-              this.value = pageNum;
+        loadingTask.promise.then(function(pdfDoc_) {
+          pdfDocInstance = pdfDoc_;
+          pdfDoc_.getPage(1).then(function(page) {
+            const scale = window.innerWidth < 640 ? 0.9 : 1.3;
+            const viewport = page.getViewport({ scale: scale });
+            if (canvas && ctx) {
+              canvas.height = viewport.height;
+              canvas.width = viewport.width;
+              page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function() {
+                if (loader) loader.classList.add('hidden');
+                canvas.classList.remove('hidden');
+              });
             }
           });
-        }
-
-        const zoomInBtn = document.getElementById('zoom-in');
-        const zoomOutBtn = document.getElementById('zoom-out');
-        if (zoomInBtn) {
-          zoomInBtn.addEventListener('click', () => {
-            if (scale >= 2.5) return;
-            scale += 0.25;
-            if (zoomText) zoomText.textContent = Math.round(scale * 100) + '%';
-            queueRenderPage(pageNum);
-          });
-        }
-        if (zoomOutBtn) {
-          zoomOutBtn.addEventListener('click', () => {
-            if (scale <= 0.6) return;
-            scale -= 0.25;
-            if (zoomText) zoomText.textContent = Math.round(scale * 100) + '%';
-            queueRenderPage(pageNum);
-          });
-        }
-
-        pdfjsLib.getDocument(fileUrl).promise.then(function(pdfDoc_) {
-          pdfDoc = pdfDoc_;
-          if (pageCountSpan) pageCountSpan.textContent = pdfDoc.numPages;
-          renderPage(pageNum);
-        }).catch(function(error) {
-          if (loader) {
-            loader.innerHTML = '<span class="text-red-400 font-bold p-4 bg-red-900/40 rounded-xl border border-red-500">' + 
-              (isRTL ? 'تعذر تحميل ملف الـ PDF عبر المتصفح. يمكنك القراءة عبر الوضع النصي.' : 'Failed to load PDF document. Please use Digital Reader mode.') + 
-              '</span>';
+        }).catch(function(err) {
+          if (statusText) {
+            statusText.textContent = isRTL ? 'تعذر تشغيل العارض المخصص، العارض اللحظي متاح في الأعلى.' : 'Canvas error. Native engine active.';
           }
         });
       }
