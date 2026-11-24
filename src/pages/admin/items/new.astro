@@ -584,42 +584,58 @@ const categories = await getCategories();
         continue;
       }
 
-      // Markdown Headers
+      // 1. عناوين ماركداون (# / ## / ###)
       if (line.startsWith('### ')) {
         flushList();
-        output.push(`<h3 class="text-base font-bold font-amiri text-[#1B365D] mt-5 mb-2">${line.slice(4).trim()}</h3>`);
+        output.push(`<h3 class="text-xl font-bold font-amiri text-[#1B365D] mt-8 mb-3">${line.slice(4).trim()}</h3>`);
         continue;
       }
       if (line.startsWith('## ') || line.startsWith('# ')) {
         flushList();
         const content = line.replace(/^#+\s*/, '').trim();
-        output.push(`<h2 class="text-lg sm:text-xl font-bold font-amiri text-[#143D33] mt-6 mb-3 border-r-4 border-[#B8924A] pr-3">${content}</h2>`);
+        output.push(`<h2 class="text-2xl font-bold font-amiri text-[#143D33] mt-10 mb-4 border-r-4 border-[#B8924A] pr-3.5 leading-snug">${content}</h2>`);
         continue;
       }
 
-      // عناوين الأقسام الأكاديمية التراثية والحديثة
-      const arabicHeadingRegex = /^(المقدمة|التمهيد|المبحث الأول|المبحث الثاني|المبحث الثالث|المبحث الرابع|المطلب الأول|المطلب الثاني|المطلب الثالث|الفصل الأول|الفصل الثاني|الفصل الثالث|الخاتمة|النتائج|التوصيات|الخلاصة|المراجع|ثبت المصادر والمراجع|أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً)\s*[:\-\.]?\s*(.*)$/i;
+      // 2. عناوين الأقسام والفصول الأكاديمية والمداخل
+      const arabicHeadingRegex = /^(الافتتاحية|المدخل|المقدمة|التمهيد|المبحث|المطلب|الفصل|الباب|المحور|طرح الإشكال|الإشكالية|الخاتمة|النتائج|التوصيات|الخلاصة|المراجع|ثبت المصادر|أولاً|ثانياً|ثالثاً|رابعاً|خامساً|سادساً|سابعاً|ثامناً|تاسعاً|عاشراً)\s*[:\-\.]?\s*(.*)$/i;
       const headingMatch = line.match(arabicHeadingRegex);
-      if (headingMatch && line.length < 120) {
+      if (headingMatch && line.length < 110) {
         flushList();
-        output.push(`<h2 class="text-lg sm:text-xl font-bold font-amiri text-[#143D33] mt-6 mb-3 border-r-4 border-[#B8924A] pr-3">${line}</h2>`);
+        output.push(`<h2 class="text-2xl font-bold font-amiri text-[#143D33] mt-10 mb-4 border-r-4 border-[#B8924A] pr-3.5 leading-snug">${line}</h2>`);
         continue;
       }
 
-      // الاقتباسات والأحاديث والآيات
+      // 3. السطور القصيرة المستقلة التي تمثل عناوين فرعية (أقل من 70 حرفاً وتنتهي بـ : أو ؟ أو ! أو بدون نقطة)
+      const isShortHeadingCandidate = 
+        line.length > 3 && 
+        line.length < 75 && 
+        (line.endsWith(':') || line.endsWith('؟') || line.endsWith('!') || (!line.endsWith('.') && !line.includes('،')));
+
+      if (isShortHeadingCandidate && (i === 0 || !lines[i - 1] || !lines[i + 1])) {
+        flushList();
+        // أول سطر عنوان رئيسي، والباقي عناوين فرعية
+        if (i === 0) {
+          output.push(`<h2 class="text-2xl sm:text-3xl font-bold font-amiri text-[#143D33] mt-4 mb-6 border-r-4 border-[#B8924A] pr-3.5 leading-snug">${line}</h2>`);
+        } else {
+          output.push(`<h3 class="text-xl font-bold font-amiri text-[#1B365D] mt-8 mb-3 pr-2">${line}</h3>`);
+        }
+        continue;
+      }
+
+      // 4. الاقتباسات والأحاديث والآيات فقط (قصيرة ومحددة بدقة)
       if (
         line.startsWith('>') || 
-        (line.startsWith('«') && line.endsWith('»')) || 
-        (line.startsWith('"') && line.endsWith('"')) ||
-        /^(قال|روي|وفي الحديث|جاء في الأثر|يقول الإمام|يقول الكاتب)\s*[:\-]/i.test(line)
+        /^(قال تعالى|قال رسول الله|روي عن|جاء في الأثر|يقول الإمام)\s*[:\-]/i.test(line) ||
+        (line.startsWith('«') && line.endsWith('»') && line.length < 250)
       ) {
         flushList();
         const quoteText = line.replace(/^>\s*/, '').replace(/^[«"]|[»"]$/g, '').trim();
-        output.push(`<blockquote class="border-r-4 border-[#B8924A] bg-[#FAF7F0] p-4 my-4 rounded-l italic font-amiri text-base text-[#1B365D] leading-relaxed shadow-sm">${quoteText}</blockquote>`);
+        output.push(`<blockquote class="border-r-4 border-[#B8924A] bg-[#FAF7F0] p-5 my-6 rounded-l font-amiri text-lg text-[#1B365D] leading-relaxed shadow-sm not-italic">${quoteText}</blockquote>`);
         continue;
       }
 
-      // قوائم نقطية
+      // 5. قوائم نقطية
       if (/^[\-\*•—]\s+/.test(line)) {
         if (currentList.length > 0 && isOrderedList) flushList();
         isOrderedList = false;
@@ -627,7 +643,7 @@ const categories = await getCategories();
         continue;
       }
 
-      // قوائم رقمية
+      // 6. قوائم رقمية
       if (/^\d+[\.\-\)]\s+/.test(line)) {
         if (currentList.length > 0 && !isOrderedList) flushList();
         isOrderedList = true;
@@ -635,9 +651,9 @@ const categories = await getCategories();
         continue;
       }
 
-      // فقرة عادية
+      // 7. فقرة نصية عادية مريحة ومتناسقة
       flushList();
-      output.push(`<p class="leading-relaxed mb-4 text-[#2C3E50] text-sm font-naskh">${line}</p>`);
+      output.push(`<p class="leading-[2.2] mb-6 text-[#1E293B] text-[18px] font-naskh">${line}</p>`);
     }
 
     flushList();

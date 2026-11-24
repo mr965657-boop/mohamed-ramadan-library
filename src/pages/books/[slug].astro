@@ -103,18 +103,22 @@ function buildUrl(base: string) {
             </p>
           </div>
 
-          <!-- نبذة عن الكتاب -->
-          <div class="prose dark:prose-invert max-w-none text-sm text-[#151C24] dark:text-[#E5E9F0] leading-relaxed">
-            <h3 class="font-amiri font-bold text-xl text-[#143D33] dark:text-[#E5E9F0] border-b border-[#E2DCD0] pb-2">
-              {lang === 'ar' ? 'عن الكتاب والمنهج' : 'About the Book & Methodology'}
-            </h3>
-            <p class="mt-3">{book.excerpt}</p>
-            <div set:html={book.content} class="mt-4" />
-          </div>
+          <!-- نبذة موجزة عن الكتاب -->
+          {book.excerpt && (
+            <div class="p-5 rounded-2xl bg-[#FAF7F0] dark:bg-[#151D28] border border-[#E2DCD0] dark:border-[#2B384E]">
+              <h3 class="font-amiri font-bold text-base text-[#143D33] dark:text-[#B8924A] mb-2 flex items-center gap-2">
+                <span>📌</span>
+                <span>{lang === 'ar' ? 'نبذة موجزة عن العمل' : 'Brief Overview'}</span>
+              </h3>
+              <p class="text-sm sm:text-base leading-relaxed text-[#2C3E50] dark:text-gray-300 font-naskh">
+                {book.excerpt}
+              </p>
+            </div>
+          )}
 
           <!-- فهرس المحتويات -->
           {book.table_of_contents && book.table_of_contents.length > 0 && (
-            <div class="bg-[#FAF7F0] dark:bg-[#151D28] rounded-xl p-5 border border-[#E2DCD0] dark:border-[#2B384E]">
+            <div class="bg-white dark:bg-[#151D28] rounded-xl p-5 border border-[#E2DCD0] dark:border-[#2B384E]">
               <h3 class="font-amiri font-bold text-lg text-[#143D33] dark:text-[#E5E9F0] mb-3">
                 {lang === 'ar' ? 'فهرس المحتويات' : 'Table of Contents'}
               </h3>
@@ -160,6 +164,72 @@ function buildUrl(base: string) {
       </div>
     </div>
 
+    <!-- مساحة قراءة متن الكتاب والمنهج المستقلة الفخمة (Scholarly Reading Canvas) -->
+    {book.content && book.content.trim() && (
+      <section class="mt-12 max-w-4xl mx-auto bg-white dark:bg-[#1A2433] rounded-3xl border border-[#E2DCD0] dark:border-[#2B384E] p-6 sm:p-12 lg:p-16 shadow-sm">
+        
+        <!-- شريط أدوات القارئ المريح -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#E2DCD0] dark:border-[#2B384E] mb-8">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-[#143D33]"></span>
+            <h2 class="font-amiri font-bold text-xl sm:text-2xl text-[#143D33] dark:text-[#E5E9F0]">
+              {lang === 'ar' ? 'عن الكتاب والمنهج والمدار الفكري' : 'About the Book & Methodology'}
+            </h2>
+          </div>
+
+          <!-- أدوات ضبط حجم الخط للقارئ -->
+          <div class="flex items-center gap-2 bg-[#FAF7F0] dark:bg-[#151D28] px-3 py-1.5 rounded-xl border border-[#E2DCD0] dark:border-[#2B384E] text-xs">
+            <span class="text-[#5A6578] dark:text-gray-400 font-semibold">{lang === 'ar' ? 'حجم الخط:' : 'Text size:'}</span>
+            <button
+              type="button"
+              id="font-dec"
+              class="w-7 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-gray-700 font-bold hover:bg-gray-100 transition-colors cursor-pointer"
+              title="تصغير الخط"
+            >
+              A-
+            </button>
+            <button
+              type="button"
+              id="font-reset"
+              class="px-2 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-gray-700 font-bold hover:bg-gray-100 transition-colors text-[11px] cursor-pointer"
+              title="الخط الطبيعي"
+            >
+              100%
+            </button>
+            <button
+              type="button"
+              id="font-inc"
+              class="w-7 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-gray-700 font-bold hover:bg-gray-100 transition-colors cursor-pointer"
+              title="تكبير الخط"
+            >
+              A+
+            </button>
+          </div>
+        </div>
+
+        <!-- متن العمل المنسق بأعلى معايير الراحة للعين والوضوح -->
+        <article id="reader-canvas" class="academic-reader-content">
+          <div set:html={book.content} />
+        </article>
+
+        <!-- خاتمة التوثيق والمشاركة في أسفل المقال -->
+        <div class="mt-12 pt-8 border-t border-[#E2DCD0] dark:border-[#2B384E] flex flex-wrap items-center justify-between gap-4 text-xs text-[#5A6578]">
+          <span class="font-amiri font-bold text-sm text-[#143D33] dark:text-[#B8924A]">
+            منصة مكتبة محمد رمضان المعرفية الرقمية
+          </span>
+          <button
+            type="button"
+            onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+            class="px-3 py-1.5 bg-[#FAF7F0] hover:bg-[#E2DCD0] text-[#143D33] font-bold rounded-lg border border-[#E2DCD0] transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <span>↑</span>
+            <span>{lang === 'ar' ? 'العودة لأعلى الصفحة' : 'Back to top'}</span>
+          </button>
+        </div>
+
+      </section>
+    )}
+
     {relatedBooks.length > 0 && (
       <div class="mt-14">
         <h2 class="text-2xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] mb-6">
@@ -178,3 +248,32 @@ function buildUrl(base: string) {
 
   </div>
 </Layout>
+
+<script is:inline>
+  let currentFontSize = 19.2;
+  const canvas = document.getElementById('reader-canvas');
+  const btnInc = document.getElementById('font-inc');
+  const btnDec = document.getElementById('font-dec');
+  const btnReset = document.getElementById('font-reset');
+
+  if (canvas && btnInc && btnDec && btnReset) {
+    btnInc.addEventListener('click', () => {
+      if (currentFontSize < 28) {
+        currentFontSize += 2;
+        canvas.style.fontSize = `${currentFontSize}px`;
+      }
+    });
+
+    btnDec.addEventListener('click', () => {
+      if (currentFontSize > 15) {
+        currentFontSize -= 2;
+        canvas.style.fontSize = `${currentFontSize}px`;
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      currentFontSize = 19.2;
+      canvas.style.fontSize = '';
+    });
+  }
+</script>
