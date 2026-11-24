@@ -114,7 +114,11 @@ CREATE POLICY "Public Update Media" ON storage.objects FOR UPDATE USING (bucket_
 DROP POLICY IF EXISTS "Public Delete Media" ON storage.objects;
 CREATE POLICY "Public Delete Media" ON storage.objects FOR DELETE USING (bucket_id = 'library-media');
 
--- 7. صلاحيات الأمان (Row Level Security - RLS)
+-- 7. صلاحيات الأمان (Row Level Security - RLS) ومنح الأذونات
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
