@@ -95,15 +95,46 @@ function buildUrl(base: string) {
   </div>
 </footer>
 
-<script is:inline define:vars={{ successText: t.newsletterSuccess }}>
+<script is:inline define:vars={{ currentLang: lang }}>
   const form = document.getElementById('newsletter-form');
+  const emailInput = document.getElementById('newsletter-email');
   const msg = document.getElementById('newsletter-msg');
-  if (form && msg) {
-    form.addEventListener('submit', (e) => {
+  const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+  if (form && msg && emailInput && submitBtn) {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.textContent = successText;
-      msg.classList.remove('hidden');
-      form.reset();
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = currentLang === 'ar' ? 'جارٍ التسجيل...' : 'Subscribing...';
+      msg.className = 'hidden';
+
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, language: currentLang }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          msg.textContent = data.message;
+          msg.className = 'text-xs text-[#B8924A] mt-2 text-center font-bold block';
+          form.reset();
+        } else {
+          msg.textContent = data.error || (currentLang === 'ar' ? 'حدث خطأ، يرجى المحاولة لاحقاً.' : 'An error occurred.');
+          msg.className = 'text-xs text-red-300 mt-2 text-center font-medium block';
+        }
+      } catch (err) {
+        msg.textContent = currentLang === 'ar' ? 'تعذر الاتصال بالخادم.' : 'Server connection failed.';
+        msg.className = 'text-xs text-red-300 mt-2 text-center font-medium block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
     });
   }
 </script>

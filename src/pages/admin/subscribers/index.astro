@@ -1,0 +1,88 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getAdminSubscribers } from '../../../lib/db';
+
+const subscribers = await getAdminSubscribers();
+const activeCount = subscribers.filter(s => s.status === 'active').length;
+---
+
+<AdminLayout title="إدارة المشتركين في النشرة البريدية">
+  <div class="max-w-5xl space-y-6">
+    
+    <!-- بطاقات الإحصاء السريع -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="p-5 bg-white rounded-2xl border border-[#E2DCD0] shadow-sm">
+        <span class="text-xs font-bold text-[#5A6578]">إجمالي المسجلين</span>
+        <p class="text-3xl font-bold font-sans text-[#143D33] mt-2">{subscribers.length}</p>
+      </div>
+
+      <div class="p-5 bg-white rounded-2xl border border-[#E2DCD0] shadow-sm">
+        <span class="text-xs font-bold text-green-700">المشتركون النشطون</span>
+        <p class="text-3xl font-bold font-sans text-green-700 mt-2">{activeCount}</p>
+      </div>
+
+      <div class="p-5 bg-white rounded-2xl border border-[#E2DCD0] shadow-sm">
+        <span class="text-xs font-bold text-gray-500">الملغى اشتراكهم</span>
+        <p class="text-3xl font-bold font-sans text-gray-500 mt-2">{subscribers.length - activeCount}</p>
+      </div>
+    </div>
+
+    <!-- جدول المشتركين -->
+    <div class="bg-white rounded-2xl border border-[#E2DCD0] p-6 shadow-sm">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-[#E2DCD0]">
+        <div>
+          <h2 class="font-amiri font-bold text-lg text-[#143D33]">قائمة المتابعين والمشتركين</h2>
+          <p class="text-xs text-[#5A6578]">يتم إرسال إشعارات الإصدارات والأبحاث الجديدة لهؤلاء المتابعين</p>
+        </div>
+      </div>
+
+      {subscribers.length === 0 ? (
+        <div class="py-12 text-center">
+          <p class="text-sm text-[#5A6578]">لا يوجد مشتركون مسجلون حتى الآن.</p>
+        </div>
+      ) : (
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead>
+              <tr class="bg-[#FAF7F0] text-[#143D33] font-bold border-b border-[#E2DCD0]">
+                <th class="py-3 px-4">البريد الإلكتروني</th>
+                <th class="py-3 px-4">لغة المراسلة</th>
+                <th class="py-3 px-4">حالة الاشتراك</th>
+                <th class="py-3 px-4">تاريخ التسجيل</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E2DCD0]">
+              {subscribers.map((sub) => (
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="py-3 px-4 font-mono font-medium text-gray-900" dir="ltr">
+                    {sub.email}
+                  </td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-0.5 rounded bg-gray-100 font-bold uppercase text-[10px]">
+                      {sub.language}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4">
+                    {sub.status === 'active' ? (
+                      <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold border border-green-200">
+                        نشط ومؤكد
+                      </span>
+                    ) : (
+                      <span class="px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-bold">
+                        ملغى
+                      </span>
+                    )}
+                  </td>
+                  <td class="py-3 px-4 text-gray-500 font-sans">
+                    {new Date(sub.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+
+  </div>
+</AdminLayout>

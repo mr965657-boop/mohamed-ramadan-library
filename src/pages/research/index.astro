@@ -1,48 +1,152 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getItems } from '../../lib/db';
+import { useTranslations, type Language } from '../../lib/i18n';
 
-const research = await getItems({ type: 'research' });
+const url = new URL(Astro.request.url);
+const lang = (url.searchParams.get('lang') as Language) || 'ar';
+const t = useTranslations(lang);
+const filter = url.searchParams.get('filter') || 'all'; // 'all' | 'papers' | 'projects'
+
+const allResearch = await getItems({ language: lang });
+const filteredItems = allResearch.filter((i) => {
+  if (filter === 'papers') return i.type === 'research';
+  if (filter === 'projects') return i.type === 'project';
+  return i.type === 'research' || i.type === 'project';
+});
+
+const isRTL = lang === 'ar';
+
+function buildFilterUrl(newFilter: string) {
+  const u = new URL(Astro.request.url);
+  if (newFilter === 'all') u.searchParams.delete('filter');
+  else u.searchParams.set('filter', newFilter);
+  return u.pathname + u.search;
+}
 ---
 
-<Layout title="البحوث والدراسات الأكاديمية">
+<Layout
+  title={isRTL ? 'البحوث والمشاريع الأكاديمية' : 'Academic Research and Projects'}
+  description={isRTL ? 'أوراق بحثية محكمة ومشاريع استقصائية ترتكز على مناهج التحقيق والتوثيق العلمي' : 'Peer-reviewed research papers and academic projects with scholarly documentation'}
+  lang={lang}
+>
   <div class="bg-[#1B365D] text-[#F7F3E9] py-12 border-b-2 border-[#B8924A]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
-        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">الدراسات التخصصية المحكمة</span>
-        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">البحوث والدراسات الأكاديمية</h1>
+        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">
+          {isRTL ? 'الدراسات والمشاريع التخصصية المحكمة' : 'Specialized Scholarly Inquiries'}
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">
+          {isRTL ? 'البحوث والمشاريع العلمية' : 'Academic Research & Projects'}
+        </h1>
         <p class="text-sm text-[#F7F3E9]/80 mt-2 leading-relaxed">
-          أوراق بحثية ومشاريع استقصائية ترتكز على مناهج التحقيق العلمي، مع هوامش وتوثيق متكامل.
+          {isRTL 
+            ? 'دراسات محكمة وأوراق بحثية مؤصلة مع توثيق ببليوغرافي متكامل (APA / MLA / Chicago) ومشاريع دلالية ورقمية.' 
+            : 'Peer-reviewed studies and research papers with complete academic citations and digital scholarly projects.'}
         </p>
+      </div>
+
+      <!-- أزرار الفلترة بين البحوث والمشاريع -->
+      <div class="mt-8 flex items-center gap-2 overflow-x-auto pb-2 text-xs">
+        <a
+          href={buildFilterUrl('all')}
+          class={`px-4 py-2 rounded-xl font-bold transition-all ${
+            filter === 'all'
+              ? 'bg-[#B8924A] text-[#143D33] shadow'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          {isRTL ? 'كافة الدراسات والمشاريع' : 'All Works'}
+        </a>
+
+        <a
+          href={buildFilterUrl('papers')}
+          class={`px-4 py-2 rounded-xl font-bold transition-all ${
+            filter === 'papers'
+              ? 'bg-[#B8924A] text-[#143D33] shadow'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          {isRTL ? 'الأوراق البحثية المحكمة' : 'Research Papers'}
+        </a>
+
+        <a
+          href={buildFilterUrl('projects')}
+          class={`px-4 py-2 rounded-xl font-bold transition-all ${
+            filter === 'projects'
+              ? 'bg-[#B8924A] text-[#143D33] shadow'
+              : 'bg-white/10 text-white hover:bg-white/20'
+          }`}
+        >
+          {isRTL ? 'المشاريع البحثية والمبادرات' : 'Research Projects'}
+        </a>
       </div>
     </div>
   </div>
 
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-    {research.map((res) => (
-      <article class="p-6 bg-white dark:bg-[#1A2433] rounded-xl border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center gap-2 text-xs text-[#B8924A] font-semibold mb-2">
-          <span>المؤلف: {res.author}</span>
-          <span>•</span>
-          <span>دراسة محكمة</span>
-        </div>
-        <h2 class="text-2xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] hover:text-[#1B365D] transition-colors">
-          <a href={`/research/${res.slug}`}>{res.title}</a>
-        </h2>
-        <p class="text-sm text-[#5A6578] dark:text-gray-300 mt-3 leading-relaxed">
-          {res.excerpt}
+    {filteredItems.length === 0 ? (
+      <div class="p-12 text-center bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0] dark:border-[#2B384E]">
+        <p class="text-[#5A6578] dark:text-gray-400 text-sm">
+          {isRTL ? 'لا توجد أعمال في هذا التصنيف حالياً.' : 'No entries available under this category.'}
         </p>
-        <div class="mt-5 pt-3 border-t border-[#E2DCD0]/60 flex items-center justify-between">
-          <div class="flex gap-2">
-            {res.tags.map(t => (
-              <span class="px-2 py-0.5 text-xs bg-[#FAF7F0] text-[#1B365D] rounded">#{t}</span>
-            ))}
-          </div>
-          <a href={`/research/${res.slug}`} class="text-xs font-bold text-[#1B365D] hover:underline">
-            قراءة البحث كاملاً ←
-          </a>
-        </div>
-      </article>
-    ))}
+      </div>
+    ) : (
+      filteredItems.map((res) => {
+        const itemUrl = `/research/${res.slug}${lang === 'en' ? '?lang=en' : ''}`;
+        return (
+          <article class="p-6 bg-white dark:bg-[#1A2433] rounded-xl border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-wrap items-center gap-2 text-xs mb-3">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#1B365D] text-white">
+                {res.type === 'project' 
+                  ? (isRTL ? 'مشروع بحثي' : 'Research Project') 
+                  : (isRTL ? 'ورقة بحثية' : 'Research Paper')}
+              </span>
+
+              {res.peer_reviewed && (
+                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                  {isRTL ? 'محكّم' : 'Peer Reviewed'}
+                </span>
+              )}
+
+              {res.is_demo && (
+                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-300">
+                  {isRTL ? 'نموذج استرشادي' : 'Demo'}
+                </span>
+              )}
+
+              <span class="text-[#5A6578] mr-auto ml-auto">
+                {new Date(res.published_at || res.created_at).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'short' })}
+              </span>
+            </div>
+
+            <h2 class="text-xl sm:text-2xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] hover:text-[#1B365D] transition-colors">
+              <a href={itemUrl}>{res.title}</a>
+            </h2>
+
+            <p class="text-sm text-[#5A6578] dark:text-gray-300 mt-3 leading-relaxed font-naskh">
+              {res.abstract || res.excerpt}
+            </p>
+
+            <div class="mt-5 pt-3 border-t border-[#E2DCD0]/60 dark:border-[#2B384E] flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap gap-1.5">
+                {res.tags.map(t => (
+                  <span class="px-2 py-0.5 text-[11px] bg-[#FAF7F0] dark:bg-[#151D28] text-[#1B365D] dark:text-[#93C5FD] rounded border border-[#E2DCD0] dark:border-[#2B384E]">
+                    #{t}
+                  </span>
+                ))}
+              </div>
+
+              <div class="flex items-center gap-4 text-xs font-bold">
+                <a href={itemUrl} class="text-[#143D33] dark:text-[#B8924A] hover:underline flex items-center gap-1">
+                  <span>{isRTL ? 'قراءة البحث والتوثيق' : 'Read Paper & Cite'}</span>
+                  <span>{isRTL ? '←' : '→'}</span>
+                </a>
+              </div>
+            </div>
+          </article>
+        );
+      })
+    )}
   </div>
 </Layout>

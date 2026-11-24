@@ -1,27 +1,36 @@
 ---
 import { getItemBySlug } from '../../lib/db';
+import { useTranslations, type Language } from '../../lib/i18n';
 
 const { slug } = Astro.params;
-const book = await getItemBySlug(slug as string, 'ar');
+const url = new URL(Astro.request.url);
+const lang = (url.searchParams.get('lang') as Language) || 'ar';
+const t = useTranslations(lang);
 
-if (!book || book.type !== 'book' || !book.file_url) {
-  return Astro.redirect('/books');
+const book = await getItemBySlug(slug as string, lang);
+
+if (!book || (book.type !== 'book' && !book.file_url)) {
+  return Astro.redirect(lang === 'en' ? '/books?lang=en' : '/books');
 }
+
+const isRTL = lang === 'ar';
+const hasTOC = book.table_of_contents && book.table_of_contents.length > 0;
 ---
 
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang={lang} dir={isRTL ? 'rtl' : 'ltr'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>قراءة: {book.title} | مكتبة محمد رمضان</title>
+    <title>{isRTL ? `قراءة: ${book.title}` : `Read: ${book.title}`} | {isRTL ? 'مكتبة محمد رمضان' : 'Mohamed Ramadan Library'}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- PDF.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
       body {
         margin: 0;
         padding: 0;
-        background-color: #2D3748;
+        background-color: #1F2937;
         font-family: system-ui, -apple-system, sans-serif;
         overflow: hidden;
       }
@@ -35,7 +44,7 @@ if (!book || book.type !== 'book' || !book.file_url) {
         box-sizing: border-box;
       }
       #pdf-canvas {
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         background: white;
         border-radius: 4px;
         max-width: 100%;
@@ -44,40 +53,40 @@ if (!book || book.type !== 'book' || !book.file_url) {
         perspective: 1500px;
       }
       .flip-anim {
-        transition: transform 0.4s ease-in-out;
+        transition: transform 0.35s ease-in-out;
       }
     </style>
   </head>
   <body class="flex flex-col h-screen select-none">
     
-    <!-- شريط أدوات القارئ العلوي -->
-    <header class="h-[60px] bg-[#143D33] text-white flex items-center justify-between px-4 sm:px-6 z-30 shrink-0 border-b border-[#B8924A]/40 shadow-md">
+    <!-- شريط أدوات القارئ العلوي (Reader Toolbar) -->
+    <header class="h-[60px] bg-[#143D33] text-white flex items-center justify-between px-3 sm:px-6 z-30 shrink-0 border-b border-[#B8924A]/40 shadow-md">
       
       <!-- اسم الكتاب والعودة -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
         <a
-          href={`/books/${book.slug}`}
+          href={`/books/${book.slug}${lang === 'en' ? '?lang=en' : ''}`}
           class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white"
-          title="العودة لصفحة الكتاب"
+          title={isRTL ? 'العودة لصفحة الكتاب' : 'Back to book page'}
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 rtl:rotate-0 ltr:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
         </a>
-        <div class="max-w-xs sm:max-w-md truncate">
+        <div class="max-w-[140px] sm:max-w-xs md:max-w-md truncate">
           <h1 class="font-bold text-xs sm:text-sm text-white truncate">{book.title}</h1>
-          <span class="text-[10px] text-[#B8924A]">المؤلف: {book.author}</span>
+          <span class="text-[10px] text-[#B8924A]">{isRTL ? 'المؤلف:' : 'Author:'} {book.author}</span>
         </div>
       </div>
 
       <!-- أدوات التنقل بين الصفحات -->
-      <div class="flex items-center gap-2 text-xs">
+      <div class="flex items-center gap-1 sm:gap-2 text-xs">
         <button
           id="prev-page"
-          class="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 font-bold transition-colors disabled:opacity-40"
-          title="الصفحة السابقة"
+          class="px-2 sm:px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 font-bold transition-colors disabled:opacity-40"
+          title={isRTL ? 'الصفحة السابقة' : 'Previous page'}
         >
-          السابق
+          {isRTL ? 'السابق' : 'Prev'}
         </button>
 
         <div class="flex items-center gap-1 font-sans">
@@ -86,44 +95,65 @@ if (!book || book.type !== 'book' || !book.file_url) {
             id="page-num"
             value="1"
             min="1"
-            class="w-12 text-center py-1 bg-white/10 border border-white/20 rounded text-white text-xs font-bold"
+            class="w-10 sm:w-12 text-center py-1 bg-white/10 border border-white/20 rounded text-white text-xs font-bold"
           />
-          <span>/</span>
-          <span id="page-count">--</span>
+          <span class="text-white/60">/</span>
+          <span id="page-count" class="text-white/80">--</span>
         </div>
 
         <button
           id="next-page"
-          class="px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 font-bold transition-colors disabled:opacity-40"
-          title="الصفحة التالية"
+          class="px-2 sm:px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 font-bold transition-colors disabled:opacity-40"
+          title={isRTL ? 'الصفحة التالية' : 'Next page'}
         >
-          التالي
+          {isRTL ? 'التالي' : 'Next'}
         </button>
       </div>
 
-      <!-- أدوات التكبير والتصغير ونمط Flipbook والتنزيل -->
-      <div class="flex items-center gap-2">
-        <div class="hidden sm:flex items-center gap-1 bg-white/10 p-1 rounded-lg">
-          <button id="zoom-out" class="px-2 py-1 hover:bg-white/10 rounded font-bold" title="تصغير">-</button>
-          <span id="zoom-text" class="text-[11px] font-sans px-1">100%</span>
-          <button id="zoom-in" class="px-2 py-1 hover:bg-white/10 rounded font-bold" title="تكبير">+</button>
+      <!-- أدوات التكبير والفهرس والملء للشاشة -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        
+        <!-- شارة طبيعة الملف: نصي / ممسوح ضوئياً -->
+        <div id="pdf-type-badge" class="hidden md:flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold bg-white/10 text-white/80">
+          <span id="pdf-type-icon">🔍</span>
+          <span id="pdf-type-text">جارٍ الفحص...</span>
         </div>
 
-        <!-- تبديل وضع القراءة: عادي / Flipbook -->
+        <!-- زر الفهرس (Table of Contents) إن وجد -->
+        {hasTOC && (
+          <button
+            id="toggle-toc-btn"
+            class="px-2 sm:px-2.5 py-1.5 text-xs rounded bg-white/10 hover:bg-white/20 text-white font-bold transition-colors"
+            title={isRTL ? 'فهرس الموضوعات' : 'Table of Contents'}
+          >
+            {isRTL ? 'الفهرس' : 'TOC'}
+          </button>
+        )}
+
+        <!-- أدوات التكبير -->
+        <div class="hidden lg:flex items-center gap-1 bg-white/10 p-1 rounded-lg">
+          <button id="zoom-out" class="px-2 py-1 hover:bg-white/10 rounded font-bold" title={isRTL ? 'تصغير' : 'Zoom out'}>-</button>
+          <span id="zoom-text" class="text-[11px] font-sans px-1">100%</span>
+          <button id="zoom-in" class="px-2 py-1 hover:bg-white/10 rounded font-bold" title={isRTL ? 'تكبير' : 'Zoom in'}>+</button>
+        </div>
+
+        <!-- تبديل ملء الشاشة -->
         <button
-          id="toggle-flip"
-          class="px-2.5 py-1.5 text-xs rounded bg-[#B8924A] text-[#143D33] font-bold hover:bg-[#D4B06A] transition-colors"
-          title="تقليب الصفحات / القارئ الكلاسيكي"
+          id="toggle-fullscreen"
+          class="p-2 rounded bg-white/10 hover:bg-white/20 text-white hidden sm:inline-flex"
+          title={isRTL ? 'ملء الشاشة' : 'Toggle Fullscreen'}
         >
-          <span id="flip-label">وضع التقليب</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+          </svg>
         </button>
 
         {book.allow_download && (
           <a
             href={book.file_url}
             download
-            class="hidden md:inline-flex p-2 rounded bg-white/10 hover:bg-white/20 text-white"
-            title="تنزيل نسخة PDF"
+            class="hidden sm:inline-flex p-2 rounded bg-white/10 hover:bg-white/20 text-white"
+            title={isRTL ? 'تنزيل نسخة PDF' : 'Download PDF'}
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -134,11 +164,54 @@ if (!book || book.type !== 'book' || !book.file_url) {
 
     </header>
 
+    <!-- تنبيه النسخة الممسوحة ضوئياً عند الاقتضاء (Scanned Notice Banner) -->
+    <div
+      id="scanned-notice"
+      class="hidden bg-amber-900/90 text-amber-100 text-xs py-2 px-4 text-center border-b border-amber-600/50 flex items-center justify-center gap-2"
+    >
+      <span>⚠️</span>
+      <span>
+        {isRTL 
+          ? 'تنبيه أكاديمي: هذا المصنف ممسوح ضوئياً (Scanned PDF) — البحث النصي الداخلي غير متاح، وتتم القراءة عبر النسخة البصرية المصورة.' 
+          : 'Scholarly notice: This document is a scanned image PDF — full-text search is unavailable; visual reading mode is active.'}
+      </span>
+      <button id="dismiss-scanned-notice" class="underline hover:text-white mr-2 ml-2">
+        {isRTL ? 'إغلاق' : 'Dismiss'}
+      </button>
+    </div>
+
+    <!-- درج الفهرس الجانبي (TOC Drawer) -->
+    {hasTOC && (
+      <aside
+        id="toc-drawer"
+        class="hidden fixed top-[60px] right-0 bottom-0 w-72 bg-[#143D33] text-white border-l border-[#B8924A]/40 z-40 p-4 shadow-2xl overflow-y-auto"
+      >
+        <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+          <h2 class="font-bold text-sm text-[#B8924A]">{isRTL ? 'فهرس المحتويات' : 'Table of Contents'}</h2>
+          <button id="close-toc-btn" class="text-white/70 hover:text-white text-xs">✕</button>
+        </div>
+        <ul class="space-y-2 text-xs">
+          {book.table_of_contents.map((item) => (
+            <li>
+              <button
+                type="button"
+                class="toc-item-btn w-full text-right rtl:text-right ltr:text-left p-2 rounded hover:bg-white/10 flex items-center justify-between text-white/90 transition-colors"
+                data-page={item.page || 1}
+              >
+                <span class="truncate">{item.title}</span>
+                {item.page && <span class="font-mono text-[#B8924A] shrink-0 font-bold">{item.page}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
     <!-- منطقة عرض صفحات الكتاب -->
     <div id="viewer-container" class="relative">
       <div id="loading-indicator" class="text-white text-sm mt-20 flex flex-col items-center gap-3">
         <div class="w-8 h-8 border-4 border-[#B8924A] border-t-transparent rounded-full animate-spin"></div>
-        <span>جارٍ تحميل صفحات الكتاب بدقة عالية...</span>
+        <span>{isRTL ? 'جارٍ تهيئة صفحات الكتاب بدقة عالية...' : 'Loading book pages in high resolution...'}</span>
       </div>
       <canvas id="pdf-canvas" class="hidden"></canvas>
     </div>
@@ -148,12 +221,11 @@ if (!book || book.type !== 'book' || !book.file_url) {
       id="resume-toast"
       class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#143D33] text-white border border-[#B8924A] px-5 py-3 rounded-xl shadow-2xl z-50 text-xs flex items-center gap-4"
     >
-      <span>تم استئناف القراءة تلقائياً من الصفحة التي توقفت عندها.</span>
-      <button id="close-toast" class="text-[#B8924A] font-bold hover:underline">حسناً</button>
+      <span>{isRTL ? 'تم استئناف القراءة تلقائياً من الصفحة التي توقفت عندها.' : 'Resumed reading from your last saved page.'}</span>
+      <button id="close-toast" class="text-[#B8924A] font-bold hover:underline">{isRTL ? 'حسناً' : 'OK'}</button>
     </div>
 
-    <script is:inline define:vars={{ fileUrl: book.file_url, bookSlug: book.slug }}>
-      // إعداد مسار worker الخاص بـ PDF.js
+    <script is:inline define:vars={{ fileUrl: book.file_url, bookSlug: book.slug, isRTL }}>
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
       let pdfDoc = null;
@@ -161,7 +233,6 @@ if (!book || book.type !== 'book' || !book.file_url) {
       let pageRendering = false;
       let pageNumPending = null;
       let scale = 1.25;
-      let isFlipMode = false;
 
       const canvas = document.getElementById('pdf-canvas');
       const ctx = canvas.getContext('2d');
@@ -171,17 +242,47 @@ if (!book || book.type !== 'book' || !book.file_url) {
       const zoomText = document.getElementById('zoom-text');
       const prevBtn = document.getElementById('prev-page');
       const nextBtn = document.getElementById('next-page');
-      const toggleFlipBtn = document.getElementById('toggle-flip');
-      const flipLabel = document.getElementById('flip-label');
       const resumeToast = document.getElementById('resume-toast');
+      const scannedNotice = document.getElementById('scanned-notice');
+      const pdfTypeBadge = document.getElementById('pdf-type-badge');
+      const pdfTypeText = document.getElementById('pdf-type-text');
+      const pdfTypeIcon = document.getElementById('pdf-type-icon');
 
-      // استرجاع آخر موضع قراءة محفوظ
+      // حساب مقياس ملائم للشاشات الصغيرة
+      if (window.innerWidth < 640) {
+        scale = 0.85;
+      }
+
+      // استرجاع موضع القراءة
       const savedPage = localStorage.getItem(`read_pos_${bookSlug}`);
       if (savedPage) {
         const parsed = parseInt(savedPage);
         if (!isNaN(parsed) && parsed > 1) {
           pageNum = parsed;
           if (resumeToast) resumeToast.classList.remove('hidden');
+        }
+      }
+
+      // التحقق مما إذا كان الملف ممسوحاً ضوئياً (Scanned image vs Text extractable)
+      async function detectScannedPDF(doc) {
+        try {
+          const samplePage = await doc.getPage(Math.min(2, doc.numPages));
+          const textContent = await samplePage.getTextContent();
+          const hasText = textContent.items && textContent.items.length > 5;
+
+          if (pdfTypeBadge && pdfTypeText && pdfTypeIcon) {
+            pdfTypeBadge.classList.remove('hidden');
+            if (hasText) {
+              pdfTypeIcon.textContent = '📄';
+              pdfTypeText.textContent = isRTL ? 'نسخة نصية' : 'Text PDF';
+            } else {
+              pdfTypeIcon.textContent = '📷';
+              pdfTypeText.textContent = isRTL ? 'نسخة ممسوحة' : 'Scanned PDF';
+              if (scannedNotice) scannedNotice.classList.remove('hidden');
+            }
+          }
+        } catch (e) {
+          console.warn('Could not inspect text content', e);
         }
       }
 
@@ -203,7 +304,6 @@ if (!book || book.type !== 'book' || !book.file_url) {
             loader.classList.add('hidden');
             canvas.classList.remove('hidden');
 
-            // حفظ تقدم القراءة تلقائياً
             localStorage.setItem(`read_pos_${bookSlug}`, num.toString());
 
             if (pageNumPending !== null) {
@@ -222,16 +322,7 @@ if (!book || book.type !== 'book' || !book.file_url) {
         if (pageRendering) {
           pageNumPending = num;
         } else {
-          if (isFlipMode) {
-            canvas.classList.add('flip-anim');
-            canvas.style.transform = 'rotateY(10deg)';
-            setTimeout(() => {
-              canvas.style.transform = 'rotateY(0deg)';
-              renderPage(num);
-            }, 150);
-          } else {
-            renderPage(num);
-          }
+          renderPage(num);
         }
       }
 
@@ -260,39 +351,79 @@ if (!book || book.type !== 'book' || !book.file_url) {
         }
       });
 
-      document.getElementById('zoom-in').addEventListener('click', function() {
-        if (scale >= 2.5) return;
-        scale += 0.25;
-        zoomText.textContent = Math.round(scale * 100) + '%';
-        queueRenderPage(pageNum);
+      const zoomInBtn = document.getElementById('zoom-in');
+      const zoomOutBtn = document.getElementById('zoom-out');
+      if (zoomInBtn) {
+        zoomInBtn.addEventListener('click', function() {
+          if (scale >= 2.5) return;
+          scale += 0.25;
+          if (zoomText) zoomText.textContent = Math.round(scale * 100) + '%';
+          queueRenderPage(pageNum);
+        });
+      }
+
+      if (zoomOutBtn) {
+        zoomOutBtn.addEventListener('click', function() {
+          if (scale <= 0.6) return;
+          scale -= 0.25;
+          if (zoomText) zoomText.textContent = Math.round(scale * 100) + '%';
+          queueRenderPage(pageNum);
+        });
+      }
+
+      // ملء الشاشة
+      const fsBtn = document.getElementById('toggle-fullscreen');
+      if (fsBtn) {
+        fsBtn.addEventListener('click', () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          } else {
+            document.exitFullscreen().catch(() => {});
+          }
+        });
+      }
+
+      // الفهرس الجانبي
+      const toggleTocBtn = document.getElementById('toggle-toc-btn');
+      const tocDrawer = document.getElementById('toc-drawer');
+      const closeTocBtn = document.getElementById('close-toc-btn');
+      if (toggleTocBtn && tocDrawer) {
+        toggleTocBtn.addEventListener('click', () => {
+          tocDrawer.classList.toggle('hidden');
+        });
+      }
+      if (closeTocBtn && tocDrawer) {
+        closeTocBtn.addEventListener('click', () => {
+          tocDrawer.classList.add('hidden');
+        });
+      }
+
+      document.querySelectorAll('.toc-item-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetPage = parseInt(btn.dataset.page || '1');
+          if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= (pdfDoc ? pdfDoc.numPages : 1000)) {
+            pageNum = targetPage;
+            queueRenderPage(pageNum);
+            if (tocDrawer) tocDrawer.classList.add('hidden');
+          }
+        });
       });
 
-      document.getElementById('zoom-out').addEventListener('click', function() {
-        if (scale <= 0.6) return;
-        scale -= 0.25;
-        zoomText.textContent = Math.round(scale * 100) + '%';
-        queueRenderPage(pageNum);
-      });
-
-      toggleFlipBtn.addEventListener('click', function() {
-        isFlipMode = !isFlipMode;
-        if (isFlipMode) {
-          flipLabel.textContent = 'الوضع الافتراضي';
-          canvas.classList.add('flip-mode');
-        } else {
-          flipLabel.textContent = 'وضع التقليب';
-          canvas.classList.remove('flip-mode');
-        }
-      });
+      const dismissNoticeBtn = document.getElementById('dismiss-scanned-notice');
+      if (dismissNoticeBtn && scannedNotice) {
+        dismissNoticeBtn.addEventListener('click', () => {
+          scannedNotice.classList.add('hidden');
+        });
+      }
 
       const closeToastBtn = document.getElementById('close-toast');
-      if (closeToastBtn) {
+      if (closeToastBtn && resumeToast) {
         closeToastBtn.addEventListener('click', () => {
           resumeToast.classList.add('hidden');
         });
       }
 
-      // دعم مفاتيح الأسهم للتنقل السلس
+      // دعم مفاتيح الأسهم
       window.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowRight' || e.key === 'PageUp') {
           onNextPage();
@@ -301,14 +432,33 @@ if (!book || book.type !== 'book' || !book.file_url) {
         }
       });
 
+      // لمس الشاشة (Touch Swipe) للهواتف
+      let touchStartX = 0;
+      window.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      window.addEventListener('touchend', (e) => {
+        const diff = e.changedTouches[0].screenX - touchStartX;
+        if (Math.abs(diff) > 60) {
+          if (diff > 0) {
+            isRTL ? onNextPage() : onPrevPage();
+          } else {
+            isRTL ? onPrevPage() : onNextPage();
+          }
+        }
+      }, { passive: true });
+
       // تحميل مستند الـ PDF
       pdfjsLib.getDocument(fileUrl).promise.then(function(pdfDoc_) {
         pdfDoc = pdfDoc_;
         pageCountSpan.textContent = pdfDoc.numPages;
         if (pageNum > pdfDoc.numPages) pageNum = 1;
         renderPage(pageNum);
+        detectScannedPDF(pdfDoc);
       }).catch(function(error) {
-        loader.innerHTML = '<span class="text-red-400">حدث خطأ أثناء تحميل ملف الـ PDF. يرجى التأكد من الرابط.</span>';
+        loader.innerHTML = '<span class="text-red-400 font-bold p-4 bg-red-900/40 rounded-xl border border-red-500">' + 
+          (isRTL ? 'تعذر تحميل ملف الـ PDF. يرجى التحقق من الاتصال بالشبكة.' : 'Failed to load PDF document. Please verify your connection.') + 
+          '</span>';
       });
     </script>
   </body>

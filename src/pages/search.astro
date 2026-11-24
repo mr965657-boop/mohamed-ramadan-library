@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { searchLibrary } from '../lib/db';
+import { searchLibrary, getRecommendations } from '../lib/db';
 import { useTranslations, type Language } from '../lib/i18n';
 import type { ItemType } from '../types/database';
 
@@ -10,10 +10,21 @@ const t = useTranslations(lang);
 
 const query = url.searchParams.get('q') || '';
 const selectedType = (url.searchParams.get('type') || undefined) as ItemType | undefined;
+const selectedYear = url.searchParams.get('year') || undefined;
+const selectedLang = (url.searchParams.get('content_lang') || undefined) as 'ar' | 'en' | undefined;
 
-const results = query ? await searchLibrary(query, { type: selectedType, language: lang }) : [];
+const results = (query || selectedType || selectedYear || selectedLang)
+  ? await searchLibrary(query, {
+      type: selectedType,
+      language: selectedLang || lang,
+      year: selectedYear,
+    })
+  : [];
 
-function buildUrl(params: Record<string, string>) {
+const recommendations = results.length === 0 ? await getRecommendations(4, lang) : [];
+const isRTL = lang === 'ar';
+
+function buildUrl(params: Record<string, string | undefined>) {
   const u = new URL(Astro.request.url);
   for (const [k, v] of Object.entries(params)) {
     if (v) u.searchParams.set(k, v);
@@ -21,33 +32,61 @@ function buildUrl(params: Record<string, string>) {
   }
   return u.pathname + u.search;
 }
+
+const typeLabels: Record<string, { ar: string; en: string }> = {
+  book: { ar: 'الكتب والمؤلفات', en: 'Books' },
+  research: { ar: 'البحوث والدراسات', en: 'Research Papers' },
+  project: { ar: 'المشاريع البحثية', en: 'Research Projects' },
+  article: { ar: 'المقالات الفكرية', en: 'Articles' },
+  lecture: { ar: 'المحاضرات الصوتية', en: 'Lectures' },
+  literature: { ar: 'الأعمال الأدبية', en: 'Literature' },
+  educational: { ar: 'المواد التعليمية', en: 'Educational' },
+};
 ---
 
-<Layout title={query ? `${lang === 'ar' ? 'نتائج البحث عن' : 'Search results for'}: ${query}` : t.searchPageTitle} lang={lang}>
+<Layout
+  title={query ? `${isRTL ? 'نتائج البحث عن' : 'Search results for'}: ${query}` : t.searchPageTitle}
+  description={t.searchPageSubtitle}
+  lang={lang}
+>
+  <!-- رأس صفحة البحث -->
   <div class="bg-[#143D33] text-[#F7F3E9] py-12 border-b-2 border-[#B8924A]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">{t.brandName}</span>
-        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">{t.searchPageTitle}</h1>
+        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">
+          {isRTL ? 'محرك البحث الأكاديمي الشامل' : 'Scholarly Search Engine'}
+        </h1>
         <p class="text-sm text-[#F7F3E9]/80 mt-2 leading-relaxed">
-          {t.searchPageSubtitle}
+          {isRTL 
+            ? 'ابحث عبر العناوين، أسماء الباحثين، ملخصات الأبحاث، المتون والكلمات المفتاحية بدقة وتطبيع نصي ذكي.' 
+            : 'Search across titles, authors, research abstracts, text corpora, and keywords with multi-faceted filtering.'}
         </p>
       </div>
 
-      <div class="mt-8 max-w-2xl">
-        <form action="/search" method="GET" class="flex gap-2">
-          <input
-            type="search"
-            name="q"
-            value={query}
-            placeholder={t.heroSearchPlaceholder}
-            class="flex-1 px-4 py-3 rounded-xl bg-white text-[#151C24] text-sm focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
-            required
-          />
+      <!-- نموذج البحث الرئيسي -->
+      <div class="mt-8 max-w-3xl">
+        <form action="/search" method="GET" class="flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <input
+              type="search"
+              name="q"
+              value={query}
+              placeholder={t.heroSearchPlaceholder}
+              class="w-full px-4 py-3.5 pr-10 rtl:pr-10 ltr:pl-10 rounded-xl bg-white text-[#151C24] text-sm focus:outline-none focus:ring-2 focus:ring-[#B8924A] shadow"
+            />
+            <span class="absolute top-1/2 -translate-y-1/2 right-3 rtl:right-3 ltr:left-3 text-gray-400">
+              🔍
+            </span>
+          </div>
+
+          {selectedType && <input type="hidden" name="type" value={selectedType} />}
+          {selectedYear && <input type="hidden" name="year" value={selectedYear} />}
           {lang === 'en' && <input type="hidden" name="lang" value="en" />}
+
           <button
             type="submit"
-            class="px-6 py-3 bg-[#B8924A] text-[#143D33] font-bold text-sm rounded-xl hover:bg-[#D4B06A] transition-colors"
+            class="px-8 py-3.5 bg-[#B8924A] text-[#143D33] font-bold text-sm rounded-xl hover:bg-[#D4B06A] transition-colors shadow"
           >
             {t.searchBtn}
           </button>
@@ -56,79 +95,193 @@ function buildUrl(params: Record<string, string>) {
     </div>
   </div>
 
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <!-- أزرار الفلترة والتصفية -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 text-xs no-scrollbar border-b border-[#E2DCD0]">
-      <span class="font-bold text-[#5A6578]">{lang === 'ar' ? 'تصفية:' : 'Filter:'}</span>
-      <a
-        href={buildUrl({ q: query, type: '', lang })}
-        class={`px-3 py-1.5 rounded-lg border font-medium ${!selectedType ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
-      >
-        {t.filterAll}
-      </a>
-      <a
-        href={buildUrl({ q: query, type: 'book', lang })}
-        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'book' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
-      >
-        {t.filterBooks}
-      </a>
-      <a
-        href={buildUrl({ q: query, type: 'research', lang })}
-        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'research' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
-      >
-        {t.filterResearch}
-      </a>
-      <a
-        href={buildUrl({ q: query, type: 'article', lang })}
-        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'article' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
-      >
-        {t.filterArticles}
-      </a>
-      <a
-        href={buildUrl({ q: query, type: 'lecture', lang })}
-        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'lecture' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
-      >
-        {t.filterLectures}
-      </a>
-    </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      
+      <!-- الشريط الجانبي للفلاتر الأكاديمية متعددة الأوجه (Faceted Filters) -->
+      <aside class="space-y-6">
+        <div class="bg-white dark:bg-[#1A2433] rounded-2xl p-5 border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm">
+          <div class="flex items-center justify-between pb-3 border-b border-[#E2DCD0] dark:border-[#2B384E] mb-4">
+            <h2 class="font-bold text-sm text-[#143D33] dark:text-[#E5E9F0] flex items-center gap-1.5">
+              <span>⚙️</span>
+              <span>{isRTL ? 'تصفية النتائج' : 'Filter Results'}</span>
+            </h2>
+            {(selectedType || selectedYear) && (
+              <a
+                href={buildUrl({ q: query, type: undefined, year: undefined, lang })}
+                class="text-[11px] text-red-600 hover:underline font-semibold"
+              >
+                {isRTL ? 'إعادة ضبط' : 'Reset'}
+              </a>
+            )}
+          </div>
 
-    {query ? (
-      <div>
-        <p class="text-sm text-[#5A6578] mb-6">
-          {t.resultsCount.replace('{count}', results.length.toString()).replace('{query}', query)}
-        </p>
+          <!-- فلتر نوع المحتوى -->
+          <div class="space-y-3 mb-6">
+            <h3 class="text-xs font-bold text-[#5A6578] uppercase tracking-wider">{isRTL ? 'نوع العمل' : 'Content Type'}</h3>
+            <div class="space-y-1 text-xs">
+              <a
+                href={buildUrl({ q: query, type: undefined, year: selectedYear, lang })}
+                class={`flex items-center justify-between px-2.5 py-1.5 rounded-lg font-medium transition-colors ${
+                  !selectedType ? 'bg-[#143D33] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                <span>{isRTL ? 'كافة الأنواع' : 'All Types'}</span>
+              </a>
 
-        {results.length > 0 ? (
-          <div class="space-y-4">
-            {results.map((item) => (
-              <article class="p-5 bg-white dark:bg-[#1A2433] rounded-xl border border-[#E2DCD0] dark:border-[#2B384E] hover:shadow-md transition-shadow">
-                <div class="flex items-center gap-2 text-xs text-[#B8924A] font-semibold mb-1">
-                  <span class="px-2 py-0.5 rounded bg-[#FAF7F0] text-[#143D33] font-bold">
-                    {item.type}
-                  </span>
-                  <span>{item.author}</span>
-                </div>
-                <h2 class="text-xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] hover:text-[#B8924A] transition-colors">
-                  <a href={`/${item.type === 'book' ? 'books' : item.type === 'research' ? 'research' : item.type === 'article' ? 'articles' : item.type === 'lecture' ? 'lectures' : item.type === 'literature' ? 'literature' : 'educational'}/${item.slug}${lang === 'en' ? '?lang=en' : ''}`}>
-                    {item.title}
-                  </a>
-                </h2>
-                <p class="text-xs text-[#5A6578] dark:text-gray-300 mt-2 line-clamp-2 leading-relaxed">
-                  {item.excerpt}
+              {Object.entries(typeLabels).map(([key, labelObj]) => (
+                <a
+                  href={buildUrl({ q: query, type: key, year: selectedYear, lang })}
+                  class={`flex items-center justify-between px-2.5 py-1.5 rounded-lg font-medium transition-colors ${
+                    selectedType === key ? 'bg-[#143D33] text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  <span>{isRTL ? labelObj.ar : labelObj.en}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- فلتر سنة النشر -->
+          <div class="space-y-3 pt-4 border-t border-[#E2DCD0] dark:border-[#2B384E]">
+            <h3 class="text-xs font-bold text-[#5A6578] uppercase tracking-wider">{isRTL ? 'سنة النشر' : 'Publication Year'}</h3>
+            <div class="flex flex-wrap gap-1.5 text-xs">
+              {['2026', '2025', '2024'].map((yr) => (
+                <a
+                  href={buildUrl({ q: query, type: selectedType, year: selectedYear === yr ? undefined : yr, lang })}
+                  class={`px-3 py-1 rounded-lg border text-xs font-medium transition-colors ${
+                    selectedYear === yr
+                      ? 'bg-[#B8924A] text-[#143D33] border-[#B8924A] font-bold'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-400'
+                  }`}
+                >
+                  {yr}
+                </a>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- منطقة النتائج الرئيسية -->
+      <main class="lg:col-span-3">
+        {(query || selectedType || selectedYear) ? (
+          <div>
+            <div class="flex items-center justify-between mb-6 pb-2 border-b border-[#E2DCD0] dark:border-[#2B384E]">
+              <p class="text-sm text-[#5A6578] dark:text-gray-400 font-medium">
+                {isRTL
+                  ? `تم العثور على (${results.length}) نتيجة ${query ? `عن "${query}"` : ''}`
+                  : `Found (${results.length}) result(s) ${query ? `for "${query}"` : ''}`}
+              </p>
+            </div>
+
+            {results.length > 0 ? (
+              <div class="space-y-4">
+                {results.map((item) => {
+                  const targetFolder = item.type === 'book' ? 'books' : item.type === 'research' || item.type === 'project' ? 'research' : item.type === 'article' ? 'articles' : item.type === 'lecture' ? 'lectures' : item.type === 'literature' ? 'literature' : 'educational';
+                  const itemUrl = `/${targetFolder}/${item.slug}${lang === 'en' ? '?lang=en' : ''}`;
+                  return (
+                    <article class="p-6 bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0] dark:border-[#2B384E] hover:shadow-md transition-shadow">
+                      <div class="flex flex-wrap items-center gap-2 text-xs mb-2">
+                        <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#143D33] text-white">
+                          {typeLabels[item.type] ? (isRTL ? typeLabels[item.type].ar : typeLabels[item.type].en) : item.type}
+                        </span>
+
+                        {item.peer_reviewed && (
+                          <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                            {isRTL ? 'محكّم' : 'Peer Reviewed'}
+                          </span>
+                        )}
+
+                        <span class="text-[#5A6578] dark:text-gray-400">
+                          {isRTL ? 'المؤلف:' : 'Author:'} <strong>{item.author}</strong>
+                        </span>
+
+                        <span class="text-gray-400">•</span>
+
+                        <span class="text-[#5A6578] dark:text-gray-400">
+                          {new Date(item.published_at || item.created_at).getFullYear()}
+                        </span>
+                      </div>
+
+                      <h2 class="text-xl sm:text-2xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] hover:text-[#1B365D] transition-colors">
+                        <a href={itemUrl}>{item.title}</a>
+                      </h2>
+
+                      <p class="text-sm text-[#5A6578] dark:text-gray-300 mt-2 line-clamp-2 leading-relaxed font-naskh">
+                        {item.abstract || item.excerpt}
+                      </p>
+
+                      <div class="mt-4 pt-3 border-t border-[#E2DCD0]/60 dark:border-[#2B384E] flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div class="flex flex-wrap gap-1.5">
+                          {item.tags.map(t => (
+                            <span class="px-2 py-0.5 rounded bg-[#FAF7F0] dark:bg-[#151D28] text-[#1B365D] dark:text-[#93C5FD] text-[11px]">
+                              #{t}
+                            </span>
+                          ))}
+                        </div>
+
+                        <a href={itemUrl} class="font-bold text-[#143D33] dark:text-[#B8924A] hover:underline flex items-center gap-1">
+                          <span>{isRTL ? 'معاينة العمل' : 'View Work'}</span>
+                          <span>{isRTL ? '←' : '→'}</span>
+                        </a>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div class="p-12 text-center bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0] dark:border-[#2B384E]">
+                <span class="text-4xl block mb-3">🔍</span>
+                <h3 class="text-lg font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">
+                  {t.noResults}
+                </h3>
+                <p class="text-xs text-[#5A6578] dark:text-gray-400 mt-2 max-w-md mx-auto leading-relaxed">
+                  {isRTL 
+                    ? 'لم نتمكن من العثور على نتائج تطابق معايير البحث المحددة. جرب استخدام كلمات عامة أكثر أو إزالة بعض الفلاتر.' 
+                    : 'No results found matching your criteria. Try broader keywords or clearing filters.'}
                 </p>
-              </article>
-            ))}
+
+                <!-- اقتراحات قراءة موصى بها عند عدم وجود نتائج -->
+                {recommendations.length > 0 && (
+                  <div class="mt-8 pt-8 border-t border-[#E2DCD0] text-right rtl:text-right ltr:text-left">
+                    <h4 class="font-amiri font-bold text-base text-[#143D33] dark:text-[#E5E9F0] mb-4">
+                      {isRTL ? 'أعمال مقترحة قد تهمك في المكتبة:' : 'Recommended readings from the library:'}
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {recommendations.map(rec => (
+                        <div class="p-4 bg-[#FAF7F0] dark:bg-[#151D28] rounded-xl border border-[#E2DCD0] text-xs">
+                          <span class="font-bold text-[#B8924A]">{rec.author}</span>
+                          <h5 class="font-bold text-sm text-[#143D33] dark:text-white mt-1">
+                            <a href={`/${rec.type === 'book' ? 'books' : 'research'}/${rec.slug}`} class="hover:underline">
+                              {rec.title}
+                            </a>
+                          </h5>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
-          <div class="text-center py-16 bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0]">
-            <p class="text-lg font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">{t.noResults}</p>
+          <!-- الحالة الافتراضية قبل إدخال البحث -->
+          <div class="p-12 text-center bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0] dark:border-[#2B384E]">
+            <span class="text-4xl block mb-3">📚</span>
+            <h3 class="text-lg font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">
+              {t.enterSearchQuery}
+            </h3>
+            <p class="text-xs text-[#5A6578] dark:text-gray-400 mt-2 max-w-md mx-auto leading-relaxed">
+              {isRTL
+                ? 'استخدم صندوق البحث بالأعلى أو اختر أحد الفلاتر الجانبية لاستكشاف المؤلفات والبحوث والمشاريع العلمية.'
+                : 'Use the search box above or the side filters to explore publications, papers, and scholarly works.'}
+            </p>
           </div>
         )}
-      </div>
-    ) : (
-      <div class="text-center py-16 bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0]">
-        <p class="text-lg font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">{t.enterSearchQuery}</p>
-      </div>
-    )}
+      </main>
+
+    </div>
   </div>
 </Layout>

@@ -1,22 +1,26 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getCategories } from '../../../lib/db';
+
+const categories = await getCategories();
 ---
 
 <AdminLayout title="إضافة عمل أو مصنف جديد">
   <div class="max-w-4xl mx-auto space-y-6">
-    <div class="bg-white rounded-xl border border-[#E2DCD0] p-6 sm:p-8 shadow-sm">
+    <div class="bg-white rounded-2xl border border-[#E2DCD0] p-6 sm:p-8 shadow-sm">
       
       <form id="new-item-form" class="space-y-6">
         
-        <!-- نوع المحتوى واللغة -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <!-- نوع المحتوى واللغة والتصنيف -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">
               نوع العمل <span class="text-red-500">*</span>
             </label>
             <select name="type" id="type-select" required class="w-full px-3 py-2 text-xs rounded-lg border border-[#E2DCD0] bg-white focus:ring-2 focus:ring-[#143D33]">
               <option value="book">كتاب ومؤلف</option>
-              <option value="research">بحث ودراسة</option>
+              <option value="research">بحث ودراسة أكاديمية</option>
+              <option value="project">مشروع بحثي متكامل</option>
               <option value="article">مقال فكري</option>
               <option value="lecture">محاضرة ودرس صوتي</option>
               <option value="literature">عمل أدبي</option>
@@ -25,7 +29,17 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">لغة المحتوى</label>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">التصنيف الموضوعي</label>
+            <select name="category_id" class="w-full px-3 py-2 text-xs rounded-lg border border-[#E2DCD0] bg-white">
+              <option value="">-- اختر التصنيف --</option>
+              {categories.map((c) => (
+                <option value={c.id}>{c.name_ar} ({c.name_en})</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">لغة المحتوى</label>
             <select name="language" class="w-full px-3 py-2 text-xs rounded-lg border border-[#E2DCD0] bg-white">
               <option value="ar">العربية (RTL)</option>
               <option value="en">English (LTR)</option>
@@ -33,18 +47,19 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">حالة النشر</label>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">حالة النشر</label>
             <select name="status" class="w-full px-3 py-2 text-xs rounded-lg border border-[#E2DCD0] bg-white">
               <option value="published">منشور فوراً</option>
               <option value="draft">حفظ كمسودة</option>
+              <option value="archived">مؤرشف</option>
             </select>
           </div>
         </div>
 
         <!-- العنوان والرابط الدائم والكاتب -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">
               عنوان العمل <span class="text-red-500">*</span>
             </label>
             <input
@@ -58,7 +73,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">
               الرابط الدائم (Slug) <span class="text-red-500">*</span>
             </label>
             <input
@@ -66,16 +81,16 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
               name="slug"
               id="slug-input"
               required
-              placeholder="مثال: manuscripts-methodology"
+              placeholder="manuscripts-methodology"
               class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#E2DCD0] font-sans"
             />
           </div>
         </div>
 
         <!-- الكاتب ورابط الغلاف -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">اسم المؤلف / الباحث</label>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">اسم المؤلف / الباحث</label>
             <input
               type="text"
               name="author"
@@ -85,7 +100,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">رابط صورة الغلاف</label>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">رابط صورة الغلاف</label>
             <input
               type="url"
               name="cover_image_url"
@@ -95,10 +110,67 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
         </div>
 
+        <!-- قسم التوثيق والبيانات الأكاديمية (Academic Metadata) -->
+        <div class="p-4 rounded-xl border border-[#B8924A]/40 bg-[#FAF7F0] space-y-4">
+          <h3 class="font-amiri font-bold text-sm text-[#143D33] flex items-center gap-1.5">
+            <span>🎓</span>
+            <span>البيانات الأكاديمية والتوثيق المرجعي (اختياري للأبحاث والكتب)</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-[#143D33] mb-1">جهة النشر / الدورية</label>
+              <input
+                type="text"
+                name="journal_or_publisher"
+                placeholder="مجلة الدراسات التراثية"
+                class="w-full px-3 py-1.5 text-xs rounded-lg border border-[#E2DCD0] bg-white"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-[#143D33] mb-1">المعرف الرقمي (DOI)</label>
+              <input
+                type="text"
+                name="doi"
+                placeholder="10.1000/182.library.2026.01"
+                class="w-full px-3 py-1.5 text-xs rounded-lg border border-[#E2DCD0] bg-white font-mono"
+              />
+            </div>
+
+            <div class="grid grid-cols-3 gap-1">
+              <div>
+                <label class="block text-[10px] font-bold text-[#143D33] mb-1">المجلد</label>
+                <input type="text" name="volume" placeholder="14" class="w-full px-2 py-1.5 text-xs rounded border border-[#E2DCD0] bg-white font-sans text-center" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-[#143D33] mb-1">العدد</label>
+                <input type="text" name="issue" placeholder="2" class="w-full px-2 py-1.5 text-xs rounded border border-[#E2DCD0] bg-white font-sans text-center" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-[#143D33] mb-1">الصفحات</label>
+                <input type="text" name="pages_range" placeholder="45-72" class="w-full px-2 py-1.5 text-xs rounded border border-[#E2DCD0] bg-white font-sans text-center" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-6 pt-1 text-xs">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="peer_reviewed" value="true" class="rounded text-[#143D33]" />
+              <span class="font-bold text-[#143D33]">بحث محكّم علمياً (Peer-Reviewed)</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="is_demo" value="true" class="rounded text-[#143D33]" />
+              <span class="text-amber-800 font-semibold">تمييز كـ "محتوى تجريبي استرشادي"</span>
+            </label>
+          </div>
+        </div>
+
         <!-- ملف PDF أو ملف الصوت MP3 وعدد الصفحات -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-[#143D33] mb-2">
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">
               رابط ملف الـ PDF أو التسجيل الصوتي
             </label>
             <input
@@ -110,7 +182,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-2">عدد الصفحات</label>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">عدد الصفحات / الدقائق</label>
             <input
               type="number"
               name="page_count"
@@ -120,23 +192,34 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
           </div>
         </div>
 
-        <!-- النبذة المختصرة -->
-        <div>
-          <label class="block text-xs font-bold text-[#143D33] mb-2">النبذة المختصرة (Excerpt)</label>
-          <textarea
-            name="excerpt"
-            rows="3"
-            placeholder="ملخص موجز للمحتوى يظهر في بطاقات المعاينة ومحركات البحث..."
-            class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#E2DCD0]"
-          ></textarea>
+        <!-- ملخص البحث (Abstract) والنبذة -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">النبذة المختصرة (Excerpt)</label>
+            <textarea
+              name="excerpt"
+              rows="3"
+              placeholder="ملخص موجز للمحتوى يظهر في بطاقات المعاينة ومحركات البحث..."
+              class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#E2DCD0]"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5">ملخص البحث الأكاديمي (Abstract)</label>
+            <textarea
+              name="abstract"
+              rows="3"
+              placeholder="ملخص الدراسة الرسمي موضحاً المنهج والنتائج..."
+              class="w-full px-3.5 py-2 text-xs rounded-lg border border-[#E2DCD0]"
+            ></textarea>
+          </div>
         </div>
 
-        <!-- محرر المحتوى الغني (HTML / TipTap Content) -->
+        <!-- محرر المحتوى الكامل -->
         <div>
-          <label class="block text-xs font-bold text-[#143D33] mb-2">
+          <label class="block text-xs font-bold text-[#143D33] mb-1.5">
             متن المحتوى الكامل (للمقالات والبحوث والنصوص)
           </label>
-          <!-- شريط أدوات تحرير سريع للمحرر -->
           <div class="flex items-center gap-1.5 p-2 bg-[#FAF7F0] border border-[#E2DCD0] rounded-t-lg text-xs">
             <button type="button" onclick="formatDoc('h2')" class="px-2 py-1 bg-white border rounded font-bold">H2</button>
             <button type="button" onclick="formatDoc('h3')" class="px-2 py-1 bg-white border rounded font-bold">H3</button>
@@ -155,7 +238,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 
         <!-- الكلمات الدلالية والوسوم -->
         <div>
-          <label class="block text-xs font-bold text-[#143D33] mb-2">الوسوم والكلمات الدلالية (مفصولة بفاصلة)</label>
+          <label class="block text-xs font-bold text-[#143D33] mb-1.5">الوسوم والكلمات الدلالية (مفصولة بفاصلة)</label>
           <input
             type="text"
             name="tags"
@@ -187,7 +270,6 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script is:inline>
-  // توليد تلقائي للرابط الدائم (Slug) من العنوان
   const titleInput = document.getElementById('title-input');
   const slugInput = document.getElementById('slug-input');
   if (titleInput && slugInput) {
@@ -222,7 +304,6 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
     textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
   }
 
-  // إرسال النموذج إلى السيرفر
   const form = document.getElementById('new-item-form');
   const msgBox = document.getElementById('form-msg');
   const saveBtn = document.getElementById('save-btn');

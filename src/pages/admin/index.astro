@@ -15,19 +15,21 @@ const recentMessages = (await getAdminMessages()).slice(0, 5);
       <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">
         <span class="text-xs font-bold text-[#5A6578]">إجمالي الكتب المنشورة</span>
         <p class="text-3xl font-amiri font-bold text-[#143D33] mt-2">{stats.totalBooks}</p>
-        <span class="text-[11px] text-green-700 font-semibold mt-1 inline-block">✓ ملفات PDF مفهرسة</span>
+        <span class="text-[11px] text-green-700 font-semibold mt-1 inline-block">✓ ملفات PDF وقارئ رقمي</span>
       </div>
 
       <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">
-        <span class="text-xs font-bold text-[#5A6578]">البحوث والمقالات</span>
-        <p class="text-3xl font-amiri font-bold text-[#1B365D] mt-2">{stats.totalResearch + stats.totalArticles}</p>
-        <span class="text-[11px] text-[#5A6578] mt-1 inline-block">دراسات ومقالات فكرية</span>
+        <span class="text-xs font-bold text-[#5A6578]">الدراسات والمشاريع البحثية</span>
+        <p class="text-3xl font-amiri font-bold text-[#1B365D] mt-2">{stats.totalResearch + stats.totalProjects}</p>
+        <span class="text-[11px] text-[#5A6578] mt-1 inline-block">أوراق محكمة بتوثيق APA/MLA</span>
       </div>
 
       <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">
-        <span class="text-xs font-bold text-[#5A6578]">المحاضرات الصوتية</span>
-        <p class="text-3xl font-amiri font-bold text-[#B8924A] mt-2">{stats.totalLectures}</p>
-        <span class="text-[11px] text-[#5A6578] mt-1 inline-block">تسجيلات وسلاسل مسموعة</span>
+        <span class="text-xs font-bold text-[#5A6578]">المشتركون في النشرة</span>
+        <p class="text-3xl font-amiri font-bold text-[#B8924A] mt-2">{stats.subscribersCount}</p>
+        <a href="/admin/subscribers" class="text-[11px] text-[#B8924A] font-bold underline mt-1 inline-block">
+          إدارة المشتركين ←
+        </a>
       </div>
 
       <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">

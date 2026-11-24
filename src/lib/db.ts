@@ -140,6 +140,7 @@ const INITIAL_ITEMS: Item[] = [
     title: 'أثر التدوين الرقمي على أصول التوثيق العلمي (دراسة تجريبية)',
     slug: 'digital-indexing-scientific-documentation',
     excerpt: 'بحث محكم يستعرض التحولات المعرفية الناتجة عن الرقمنة وكيفية الحفاظ على دقة التحقيق الأكاديمي.',
+    abstract: 'تسعى هذه الدراسة إلى قراءة أثر التحول الرقمي على مناهج التحقيق والتوثيق، مؤكدة على أهمية تضافر المعايير الأكاديمية التراثية مع الإمكانات التقنية الحديثة لضمان سلامة المتون.',
     content: '<h2>ملخص البحث</h2><p>تسعى هذه الدراسة إلى قراءة أثر التحول الرقمي على مناهج التحقيق والتوثيق، مؤكدة على أهمية تضافر المعايير الأكاديمية التراثية مع الإمكانات التقنية الحديثة لضمان سلامة المتون.</p><h3>المبحث الأول: معايير التحقيق</h3><p>تستند أسس التحقيق العلمي إلى مقابلة النسخ الخطية وحفظ الفروق، وهو ما ييسره الحاسوب اليوم عبر خوارزميات المقارنة البصرية والنصية.</p>',
     author: 'محمد رمضان',
     cover_image_url: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=600',
@@ -158,6 +159,19 @@ const INITIAL_ITEMS: Item[] = [
     custom_license_terms: null,
     reading_time_minutes: 20,
     table_of_contents: [],
+    doi: '10.1000/182.library.2026.01',
+    journal_or_publisher: 'مجلة الدراسات التراثية والرقمنة',
+    volume: '14',
+    issue: '2',
+    pages_range: '45-72',
+    peer_reviewed: true,
+    is_demo: true,
+    references: [
+      { text: 'ابن خلدون، عبد الرحمن. (1408هـ). ديوان المبتدأ والخبر في تاريخ العرب والبربر. بيروت: دار الفكر.', language: 'ar' },
+      { text: 'سزكين، فؤاد. (1991). تاريخ التراث العربي. الرياض: جامعة الإمام محمد بن سعود الإسلامية.', language: 'ar' },
+      { text: 'Rosenthal, Franz. (1968). A History of Muslim Historiography. Leiden: E. J. Brill.', language: 'en' },
+      { text: 'Witkam, Jan Just. (2007). Establishing the stemma: Fact or fiction?. Journal of Islamic Manuscripts, 1(1), 12-34.', language: 'en' },
+    ],
     seo_title: 'أثر التدوين الرقمي على التوثيق العلمي | مكتبة محمد رمضان',
     seo_description: 'بحث أكاديمي يستعرض التحولات المعرفية الناتجة عن الرقمنة في التوثيق العلمي.',
     seo_keywords: ['رقمنة', 'توثيق', 'بحث محكم'],
@@ -166,6 +180,49 @@ const INITIAL_ITEMS: Item[] = [
     created_by: null,
     created_at: '2026-02-01T12:00:00Z',
     updated_at: '2026-02-01T12:00:00Z',
+  },
+  {
+    id: 'p1',
+    type: 'project',
+    translation_group_id: 'tg-7',
+    language: 'ar',
+    title: 'مشروع مكنز التراث الرقمي: أرشفة وفهرسة المخطوطات النادرة (مشروع بحثي تجريبي)',
+    slug: 'digital-heritage-thesaurus-project',
+    excerpt: 'مشروع أكاديمي متكامل يهدف إلى بناء منصة دلالية مفتوحة المصدر لفهرسة المخطوطات والتحليل المعجمي التراثي.',
+    abstract: 'يعد مشروع مكنز التراث الرقمي مبادرة بحثية تسعى إلى توظيف تقنيات معالجة اللغة الطبيعية والويب الدلالي في خدمة الفهرسة الآلية للوثائق التراثية.',
+    content: '<h2>أهداف المشروع ورؤيته الأكاديمية</h2><p>1. بناء قاعدة بيانات معجمية موحدة للمصطلحات التراثية والمفاهيم الحضارية.<br/>2. ربط الفهارس الخطية بالمصادر المعرفية المفتوحة والبيانات المترابطة (Linked Open Data).<br/>3. تطوير نماذج حاسوبية مدربة على قراءة الخطوط التراثية القديمة بالتعاون مع مراكز الأبحاث.</p><h3>المخرجات المتوقعة</h3><p>إتاحة واجهة برمجية API مفتوحة ومجانية تخدم الباحثين في الجامعات العربية والإسلامية.</p>',
+    author: 'محمد رمضان',
+    cover_image_url: 'https://images.unsplash.com/photo-1507842229451-7f01be7fe70d?auto=format&fit=crop&q=80&w=600',
+    file_url: null,
+    file_size: null,
+    page_count: null,
+    duration_seconds: null,
+    audio_transcript: null,
+    category_id: 'c2',
+    tags: ['مشاريع بحثية', 'مكنز رقمي', 'تحقيق المخطوطات'],
+    status: 'published',
+    published_at: '2026-02-22T08:00:00Z',
+    allow_download: true,
+    allow_offline_read: true,
+    license_type: 'creative_commons',
+    custom_license_terms: null,
+    reading_time_minutes: 15,
+    table_of_contents: [],
+    journal_or_publisher: 'مبادرات ومشاريع مكتبة محمد رمضان',
+    peer_reviewed: true,
+    is_demo: true,
+    references: [
+      { text: 'بدوي، عبد الرحمن. (1977). مناهج البحث العلمي. الكويت: وكالة المطبوعات.', language: 'ar' },
+      { text: 'Crane, Gregory. (2006). What Do You Do with a Million Books?. D-Lib Magazine, 12(3).', language: 'en' },
+    ],
+    seo_title: 'مشروع مكنز التراث الرقمي | مكتبة محمد رمضان',
+    seo_description: 'مشروع بحثي لتطوير مكنز دلالي وفهرسة المخطوطات رقمياً.',
+    seo_keywords: ['مشروع بحثي', 'مكنز', 'مخطوطات'],
+    view_count: 980,
+    download_count: 110,
+    created_by: null,
+    created_at: '2026-02-22T08:00:00Z',
+    updated_at: '2026-02-22T08:00:00Z',
   },
   {
     id: 'a1',
@@ -356,7 +413,8 @@ const INITIAL_ITEMS: Item[] = [
     title: 'The Impact of Digital Indexing on Scientific Documentation',
     slug: 'digital-indexing-scientific-documentation',
     excerpt: 'Peer-reviewed research exploring digital epistemological shifts and the preservation of academic rigor in manuscript editing.',
-    content: '<h2>Abstract</h2><p>This paper examines the influence of digital transformation on manuscript verification methodologies, emphasizing the harmonization of classical academic standards with computational capabilities.</p>',
+    abstract: 'This paper examines the influence of digital transformation on manuscript verification methodologies, emphasizing the harmonization of classical academic standards with computational capabilities.',
+    content: '<h2>Abstract</h2><p>This paper examines the influence of digital transformation on manuscript verification methodologies, emphasizing the harmonization of classical academic standards with computational capabilities.</p><h3>Section 1: Critical Text Editing Frameworks</h3><p>Scholarly inquiry hinges on meticulous recension and variant collation, a discipline significantly augmented today through automated optical comparison and collation algorithms.</p>',
     author: 'Mohamed Ramadan',
     cover_image_url: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=600',
     file_url: null,
@@ -374,6 +432,18 @@ const INITIAL_ITEMS: Item[] = [
     custom_license_terms: null,
     reading_time_minutes: 20,
     table_of_contents: [],
+    doi: '10.1000/182.library.2026.01',
+    journal_or_publisher: 'Journal of Islamic Manuscripts and Digital Humanities',
+    volume: '14',
+    issue: '2',
+    pages_range: '45-72',
+    peer_reviewed: true,
+    is_demo: true,
+    references: [
+      { text: 'Ibn Khaldun, A. (1958). The Muqaddimah: An Introduction to History. Translated by Franz Rosenthal. Princeton University Press.', language: 'en' },
+      { text: 'Witkam, J. J. (2007). Establishing the stemma: Fact or fiction?. Journal of Islamic Manuscripts, 1(1), 12-34.', language: 'en' },
+      { text: 'Sezgin, F. (1991). Geschichte des arabischen Schrifttums. Leiden: E. J. Brill.', language: 'en' },
+    ],
     seo_title: 'The Impact of Digital Indexing on Scientific Documentation',
     seo_description: 'Academic research exploring the shift in manuscript editing with modern digital tools.',
     seo_keywords: ['digital indexing', 'documentation', 'manuscripts'],
@@ -382,6 +452,49 @@ const INITIAL_ITEMS: Item[] = [
     created_by: null,
     created_at: '2026-02-01T12:00:00Z',
     updated_at: '2026-02-01T12:00:00Z',
+  },
+  {
+    id: 'p1_en',
+    type: 'project',
+    translation_group_id: 'tg-7',
+    language: 'en',
+    title: 'Digital Heritage Thesaurus Project: Archiving and Indexing Rare Manuscripts (Demo Research Project)',
+    slug: 'digital-heritage-thesaurus-project',
+    excerpt: 'An integrated academic initiative to construct an open-source semantic platform for manuscript classification and lexical corpus analysis.',
+    abstract: 'The Digital Heritage Thesaurus Project is a specialized research venture employing NLP and Linked Open Data frameworks to facilitate automated semantic indexing for Arabic-Islamic manuscripts.',
+    content: '<h2>Project Objectives</h2><p>1. Establishing an authoritative, structured thesaurus for classical scholarly terminology.<br/>2. Interlinking codicological registries with global open knowledge repositories.<br/>3. Fine-tuning machine learning models for Arabic paleography and historical script analysis.</p>',
+    author: 'Mohamed Ramadan',
+    cover_image_url: 'https://images.unsplash.com/photo-1507842229451-7f01be7fe70d?auto=format&fit=crop&q=80&w=600',
+    file_url: null,
+    file_size: null,
+    page_count: null,
+    duration_seconds: null,
+    audio_transcript: null,
+    category_id: 'c2',
+    tags: ['Research Projects', 'Digital Humanities', 'Thesaurus'],
+    status: 'published',
+    published_at: '2026-02-22T08:00:00Z',
+    allow_download: true,
+    allow_offline_read: true,
+    license_type: 'creative_commons',
+    custom_license_terms: null,
+    reading_time_minutes: 15,
+    table_of_contents: [],
+    journal_or_publisher: 'Mohamed Ramadan Digital Initiatives',
+    peer_reviewed: true,
+    is_demo: true,
+    references: [
+      { text: 'Crane, G. (2006). What Do You Do with a Million Books?. D-Lib Magazine, 12(3).', language: 'en' },
+      { text: 'Badawi, A. (1977). Methods of Scientific Research. Kuwait: Academic Publications.', language: 'en' },
+    ],
+    seo_title: 'Digital Heritage Thesaurus Project | Mohamed Ramadan Library',
+    seo_description: 'A research project for semantic indexing and manuscript archiving.',
+    seo_keywords: ['research project', 'thesaurus', 'manuscripts'],
+    view_count: 520,
+    download_count: 65,
+    created_by: null,
+    created_at: '2026-02-22T08:00:00Z',
+    updated_at: '2026-02-22T08:00:00Z',
   },
   {
     id: 'a1_en',
@@ -527,6 +640,7 @@ const INITIAL_ITEMS: Item[] = [
 
 // المتجر الداخلي في الذاكرة (Local In-Memory Store) للتطوير المحلي والتجربة المباشرة
 let memoryItems: Item[] = [...INITIAL_ITEMS];
+let memoryCategories: Category[] = [...INITIAL_CATEGORIES];
 let memoryMessages: ContactMessage[] = [];
 let memorySubscribers: Subscriber[] = [];
 
@@ -547,7 +661,7 @@ export async function getCategories(): Promise<Category[]> {
       console.warn('Fallback to local categories');
     }
   }
-  return INITIAL_CATEGORIES;
+  return memoryCategories;
 }
 
 export async function getItems(options?: {
@@ -607,19 +721,44 @@ export async function getItemBySlug(slug: string, language: 'ar' | 'en' = 'ar'):
   return memoryItems.find((i) => i.slug === slug && i.language === language) || null;
 }
 
-// محرك البحث الذكي بدعم تطبيع العربية
-export async function searchLibrary(queryText: string, options?: { type?: ItemType; language?: 'ar' | 'en' }): Promise<Item[]> {
-  if (!queryText.trim()) return [];
-
-  const normalized = normalizeArabicText(queryText);
+// محرك البحث الذكي متعدد الأوجه (Faceted Search Engine) بدعم تطبيع النصوص وفلاتر التصنيف والسنة والباحث
+export async function searchLibrary(
+  queryText: string,
+  options?: {
+    type?: ItemType;
+    language?: 'ar' | 'en';
+    year?: string;
+    categorySlug?: string;
+    author?: string;
+  }
+): Promise<Item[]> {
+  const normalized = queryText ? normalizeArabicText(queryText) : '';
   const lang = options?.language || 'ar';
 
   return memoryItems.filter((item) => {
     if (item.status !== 'published') return false;
+    if (options?.language && item.language !== options.language) return false;
     if (options?.type && item.type !== options.type) return false;
+
+    // تصفية حسب السنة
+    if (options?.year) {
+      const itemYear = new Date(item.published_at || item.created_at).getFullYear().toString();
+      if (itemYear !== options.year) return false;
+    }
+
+    // تصفية حسب الباحث
+    if (options?.author) {
+      const normAuthorFilter = normalizeArabicText(options.author);
+      const normItemAuthor = normalizeArabicText(item.author);
+      if (!normItemAuthor.includes(normAuthorFilter)) return false;
+    }
+
+    // إذا لم يكن هناك نص بحث (تصفية خالصة)، نقبل العنصر
+    if (!normalized) return true;
 
     const normTitle = normalizeArabicText(item.title);
     const normExcerpt = normalizeArabicText(item.excerpt || '');
+    const normAbstract = normalizeArabicText(item.abstract || '');
     const normAuthor = normalizeArabicText(item.author);
     const normContent = normalizeArabicText(item.content || '');
     const normTags = item.tags.map(t => normalizeArabicText(t)).join(' ');
@@ -627,11 +766,20 @@ export async function searchLibrary(queryText: string, options?: { type?: ItemTy
     return (
       normTitle.includes(normalized) ||
       normExcerpt.includes(normalized) ||
+      normAbstract.includes(normalized) ||
       normAuthor.includes(normalized) ||
       normContent.includes(normalized) ||
       normTags.includes(normalized)
     );
   });
+}
+
+// دالة جلب اقتراحات القراءة والمواد ذات الصلة
+export async function getRecommendations(limit: number = 4, language: 'ar' | 'en' = 'ar'): Promise<Item[]> {
+  return memoryItems
+    .filter(i => i.status === 'published' && i.language === language)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, limit);
 }
 
 // إرسال رسالة تواصل وحفظها في قاعدة البيانات / لوحة الإدارة
@@ -660,11 +808,32 @@ export async function submitContactMessage(message: Omit<ContactMessage, 'id' | 
   return { success: true, id: newMsg.id };
 }
 
-// اشتراك في النشرة البريدية
-export async function subscribeNewsletter(email: string, language: 'ar' | 'en' = 'ar'): Promise<{ success: boolean }> {
+// اشتراك في النشرة البريدية مع فحص البريد ومنع التكرار ودعم إعادة التفعيل
+export async function subscribeNewsletter(
+  email: string,
+  language: 'ar' | 'en' = 'ar'
+): Promise<{ success: boolean; alreadySubscribed?: boolean; error?: string }> {
+  const cleanEmail = email.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(cleanEmail)) {
+    return { success: false, error: 'صيغة البريد الإلكتروني غير صحيحة' };
+  }
+
+  // فحص المشتركين محلياً
+  const existing = memorySubscribers.find(s => s.email.toLowerCase() === cleanEmail);
+  if (existing) {
+    if (existing.status === 'active') {
+      return { success: true, alreadySubscribed: true };
+    } else {
+      existing.status = 'active';
+      return { success: true, alreadySubscribed: false };
+    }
+  }
+
   const sub: Subscriber = {
     id: 'sub_' + Date.now(),
-    email,
+    email: cleanEmail,
     language,
     is_confirmed: true,
     status: 'active',
@@ -680,9 +849,7 @@ export async function subscribeNewsletter(email: string, language: 'ar' | 'en' =
     }
   }
 
-  if (!memorySubscribers.find(s => s.email === email)) {
-    memorySubscribers.unshift(sub);
-  }
+  memorySubscribers.unshift(sub);
   return { success: true };
 }
 
@@ -699,10 +866,59 @@ export async function getAdminStats() {
     totalLectures: allItems.filter(i => i.type === 'lecture').length,
     totalLiterature: allItems.filter(i => i.type === 'literature').length,
     totalEducational: allItems.filter(i => i.type === 'educational').length,
+    totalProjects: allItems.filter(i => i.type === 'project').length,
+    totalCategories: memoryCategories.length,
     totalItems: allItems.length,
     newMessagesCount: memoryMessages.filter(m => m.status === 'new').length,
     subscribersCount: memorySubscribers.length,
   };
+}
+
+export async function createCategory(catData: Omit<Category, 'id' | 'created_at'>): Promise<Category> {
+  const newCat: Category = {
+    ...catData,
+    id: 'cat_' + Date.now(),
+    created_at: new Date().toISOString(),
+  };
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase.from('categories').insert([newCat]).select().single();
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn('Fallback create category locally');
+    }
+  }
+  memoryCategories.push(newCat);
+  return newCat;
+}
+
+export async function updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase.from('categories').update(updates).eq('id', id).select().single();
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn('Fallback update category locally');
+    }
+  }
+  const idx = memoryCategories.findIndex(c => c.id === id);
+  if (idx === -1) return null;
+  memoryCategories[idx] = { ...memoryCategories[idx], ...updates };
+  return memoryCategories[idx];
+}
+
+export async function deleteCategory(id: string): Promise<boolean> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (!error) return true;
+    } catch (e) {
+      console.warn('Fallback delete category locally');
+    }
+  }
+  const initial = memoryCategories.length;
+  memoryCategories = memoryCategories.filter(c => c.id !== id);
+  return memoryCategories.length < initial;
 }
 
 export async function getAdminItems(): Promise<Item[]> {
@@ -749,4 +965,33 @@ export async function updateMessageStatus(id: string, status: ContactMessage['st
   if (!msg) return false;
   msg.status = status;
   return true;
+}
+
+export async function getAdminSubscribers(): Promise<Subscriber[]> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase.from('subscribers').select('*').order('created_at', { ascending: false });
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn('Fallback get subscribers');
+    }
+  }
+  return [...memorySubscribers];
+}
+
+export async function unsubscribeEmail(email: string): Promise<boolean> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('subscribers').update({ status: 'unsubscribed' }).eq('email', email);
+      if (!error) return true;
+    } catch (e) {
+      console.warn('Fallback unsubscribe');
+    }
+  }
+  const sub = memorySubscribers.find(s => s.email.toLowerCase() === email.toLowerCase());
+  if (sub) {
+    sub.status = 'unsubscribed';
+    return true;
+  }
+  return false;
 }

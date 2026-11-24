@@ -1,6 +1,6 @@
 export type UserRole = 'super_admin' | 'editor' | 'author' | 'translator' | 'media_manager' | 'reader';
 
-export type ItemType = 'book' | 'research' | 'article' | 'lecture' | 'literature' | 'educational';
+export type ItemType = 'book' | 'research' | 'article' | 'lecture' | 'literature' | 'educational' | 'project';
 
 export type ItemStatus = 'draft' | 'published' | 'scheduled' | 'archived';
 
@@ -29,6 +29,20 @@ export interface Category {
   created_at: string;
 }
 
+export interface BibliographicReference {
+  id?: string;
+  text: string;
+  link?: string | null;
+  language?: 'ar' | 'en';
+}
+
+export interface Attachment {
+  title: string;
+  url: string;
+  size_bytes?: number;
+  format?: string;
+}
+
 export interface Item {
   id: string;
   type: ItemType;
@@ -37,8 +51,10 @@ export interface Item {
   title: string;
   slug: string;
   excerpt: string | null;
+  abstract?: string | null;
   content: string | null;
   author: string;
+  co_authors?: string[];
   cover_image_url: string | null;
   file_url: string | null;
   file_size: number | null;
@@ -56,6 +72,19 @@ export interface Item {
   custom_license_terms: string | null;
   reading_time_minutes: number;
   table_of_contents: Array<{ title: string; page?: number }>;
+  
+  // حقول التوثيق والبيانات الأكاديمية (Academic Metadata)
+  doi?: string | null;
+  journal_or_publisher?: string | null;
+  volume?: string | null;
+  issue?: string | null;
+  pages_range?: string | null;
+  peer_reviewed?: boolean;
+  references?: BibliographicReference[];
+  attachments?: Attachment[];
+  related_item_ids?: string[];
+  is_demo?: boolean; // لتمييز المحتوى التوضيحي حتى يتم استبداله ببيانات حقيقية
+
   seo_title: string | null;
   seo_description: string | null;
   seo_keywords: string[];
