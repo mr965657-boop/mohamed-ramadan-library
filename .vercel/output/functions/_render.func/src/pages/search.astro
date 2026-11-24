@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { searchLibrary } from '../lib/db';
+import type { ItemType } from '../types/database';
+
+const url = new URL(Astro.request.url);
+const query = url.searchParams.get('q') || '';
+const selectedType = (url.searchParams.get('type') || undefined) as ItemType | undefined;
+
+const results = query ? await searchLibrary(query, { type: selectedType }) : [];
+---
+
+<Layout title={query ? `نتائج البحث عن: ${query}` : 'البحث الشامل في المكتبة'}>
+  <div class="bg-[#143D33] text-[#F7F3E9] py-12 border-b-2 border-[#B8924A]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">محرك البحث المعرفي</span>
+        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">البحث الشامل في المكتبة</h1>
+        <p class="text-sm text-[#F7F3E9]/80 mt-2 leading-relaxed">
+          ابحث في عناوين ونصوص الكتب، والبحوث الأكاديمية، والمقالات، وتسجيلات المحاضرات بدعم تطبيع اللغة العربية.
+        </p>
+      </div>
+
+      <!-- نموذج البحث في الهيدر -->
+      <div class="mt-8 max-w-2xl">
+        <form action="/search" method="GET" class="flex gap-2">
+          <input
+            type="search"
+            name="q"
+            value={query}
+            placeholder="اكتب كلمة البحث هنا..."
+            class="flex-1 px-4 py-3 rounded-xl bg-white text-[#151C24] text-sm focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
+            required
+          />
+          <button
+            type="submit"
+            class="px-6 py-3 bg-[#B8924A] text-[#143D33] font-bold text-sm rounded-xl hover:bg-[#D4B06A] transition-colors"
+          >
+            بحث
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- شريط تصفية الأقسام -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 text-xs no-scrollbar border-b border-[#E2DCD0]">
+      <span class="font-bold text-[#5A6578]">تصفية النتائج:</span>
+      <a
+        href={`/search?q=${encodeURIComponent(query)}`}
+        class={`px-3 py-1.5 rounded-lg border font-medium ${!selectedType ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
+      >
+        الكل
+      </a>
+      <a
+        href={`/search?q=${encodeURIComponent(query)}&type=book`}
+        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'book' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
+      >
+        الكتب
+      </a>
+      <a
+        href={`/search?q=${encodeURIComponent(query)}&type=research`}
+        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'research' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
+      >
+        البحوث
+      </a>
+      <a
+        href={`/search?q=${encodeURIComponent(query)}&type=article`}
+        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'article' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
+      >
+        المقالات
+      </a>
+      <a
+        href={`/search?q=${encodeURIComponent(query)}&type=lecture`}
+        class={`px-3 py-1.5 rounded-lg border font-medium ${selectedType === 'lecture' ? 'bg-[#143D33] text-white border-[#143D33]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}`}
+      >
+        المحاضرات
+      </a>
+    </div>
+
+    <!-- عدد النتائج أو رسالة فارغة -->
+    {query ? (
+      <div>
+        <p class="text-sm text-[#5A6578] mb-6">
+          عثرنا على <strong>{results.length}</strong> نتيجة بحث لكلمة: «<strong>{query}</strong>»
+        </p>
+
+        {results.length > 0 ? (
+          <div class="space-y-4">
+            {results.map((item) => (
+              <article class="p-5 bg-white dark:bg-[#1A2433] rounded-xl border border-[#E2DCD0] dark:border-[#2B384E] hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-2 text-xs text-[#B8924A] font-semibold mb-1">
+                  <span class="px-2 py-0.5 rounded bg-[#FAF7F0] text-[#143D33] font-bold">
+                    {item.type === 'book' ? 'كتاب' : item.type === 'research' ? 'بحث' : item.type === 'article' ? 'مقال' : item.type === 'lecture' ? 'محاضرة' : item.type === 'literature' ? 'عمل أدبي' : 'مادة تعليمية'}
+                  </span>
+                  <span>المؤلف: {item.author}</span>
+                </div>
+                <h2 class="text-xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] hover:text-[#B8924A] transition-colors">
+                  <a href={`/${item.type === 'book' ? 'books' : item.type === 'research' ? 'research' : item.type === 'article' ? 'articles' : item.type === 'lecture' ? 'lectures' : item.type === 'literature' ? 'literature' : 'educational'}/${item.slug}`}>
+                    {item.title}
+                  </a>
+                </h2>
+                <p class="text-xs text-[#5A6578] dark:text-gray-300 mt-2 line-clamp-2 leading-relaxed">
+                  {item.excerpt}
+                </p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-16 bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0]">
+            <p class="text-lg font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">لم يتم العثور على نتائج مطابقة</p>
+            <p class="text-xs text-[#5A6578] mt-2">جرب البحث بكلمات عامة أو تأكد من خيارات التصفية.</p>
+          </div>
+        )}
+      </div>
+    ) : (
+      <div class="text-center py-16 bg-white dark:bg-[#1A2433] rounded-2xl border border-[#E2DCD0]">
+        <p class="text-lg font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">أدخل كلمة أو عبارة في صندوق البحث أعلاه</p>
+        <p class="text-xs text-[#5A6578] mt-2">يدعم المحرك البحث باللغة العربية والإنجليزية، وتطبيع الهمزات والتنوين.</p>
+      </div>
+    )}
+  </div>
+</Layout>

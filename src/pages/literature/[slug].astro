@@ -1,0 +1,39 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getItemBySlug } from '../../lib/db';
+
+const { slug } = Astro.params;
+const literature = await getItemBySlug(slug as string, 'ar');
+
+if (!literature || literature.type !== 'literature') {
+  return Astro.redirect('/literature');
+}
+---
+
+<Layout title={literature.title} description={literature.excerpt || literature.title}>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <nav class="text-xs text-[#5A6578] mb-6 flex items-center gap-2">
+      <a href="/" class="hover:underline">الرئيسية</a>
+      <span>/</span>
+      <a href="/literature" class="hover:underline">الأعمال الأدبية</a>
+      <span>/</span>
+      <span class="text-[#143D33] font-semibold">{literature.title}</span>
+    </nav>
+
+    <header class="mb-8 pb-4 border-b border-[#E2DCD0]">
+      <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">نص أدبي</span>
+      <h1 class="text-3xl sm:text-4xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] mt-2 leading-tight">
+        {literature.title}
+      </h1>
+      <p class="text-xs text-[#5A6578] mt-2">بقلم: {literature.author}</p>
+    </header>
+
+    <article class="prose max-w-none text-base leading-loose font-amiri text-[#151C24] dark:text-[#E5E9F0]">
+      <div set:html={literature.content} />
+    </article>
+
+    <div class="mt-12 pt-6 border-t border-[#E2DCD0] flex justify-between text-xs text-[#5A6578]">
+      <a href="/literature" class="font-bold text-[#143D33] hover:underline">← العودة إلى قائمة الأعمال الأدبية</a>
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,85 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getAdminMessages } from '../../../lib/db';
+
+const messages = await getAdminMessages();
+---
+
+<AdminLayout title="صندوق رسائل التواصل">
+  <div class="space-y-6">
+    <p class="text-xs text-[#5A6578]">رسائل واستفسارات الزوار والباحثين المرسلة عبر صفحة التواصل</p>
+
+    <div class="bg-white rounded-xl border border-[#E2DCD0] shadow-sm overflow-hidden">
+      {messages.length > 0 ? (
+        <div class="divide-y divide-[#E2DCD0]">
+          {messages.map((msg) => (
+            <div class="p-6 hover:bg-[#FAF7F0]/60 transition-colors" id={`msg-${msg.id}`}>
+              <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-sm text-[#143D33]">{msg.name}</span>
+                  <span class="text-xs text-gray-500 font-sans">&lt;{msg.email}&gt;</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#B8924A]/20 text-[#8C6C30]">
+                    {msg.category === 'books' ? 'استفسار كتب' : msg.category === 'research' ? 'بحوث ودراسات' : msg.category === 'teaching' ? 'تدريس' : msg.category === 'scientific_cooperation' ? 'تعاون علمي' : 'عام'}
+                  </span>
+                </div>
+                <span class="text-xs text-[#5A6578] font-sans">
+                  {new Date(msg.created_at).toLocaleString('ar-EG')}
+                </span>
+              </div>
+
+              <h3 class="font-bold text-xs text-[#151C24] mb-1">الموضوع: {msg.subject || 'بدون موضوع'}</h3>
+              <p class="text-xs text-[#5A6578] leading-relaxed bg-[#FAF7F0] p-3 rounded-lg border border-[#E2DCD0]/60">
+                {msg.message}
+              </p>
+
+              <div class="mt-4 flex items-center justify-between text-xs pt-2">
+                <span class="text-[11px] text-blue-700 font-semibold">
+                  الحالة: {msg.status === 'new' ? 'جديدة' : 'مقروءة'}
+                </span>
+                <div class="flex items-center gap-2">
+                  <a
+                    href={`mailto:${msg.email}?subject=رد على: ${encodeURIComponent(msg.subject || 'استفساركم في مكتبة محمد رمضان')}`}
+                    class="px-3 py-1 bg-[#143D33] text-white rounded font-bold hover:bg-[#1F5A4B] transition-colors"
+                  >
+                    رد عبر البريد
+                  </a>
+                  <button
+                    onclick={`markArchived('${msg.id}')`}
+                    class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded font-semibold transition-colors"
+                  >
+                    أرشفة
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16 text-xs text-[#5A6578]">
+          <p class="text-base font-amiri font-bold text-[#143D33] mb-1">صندوق الرسائل فارغ</p>
+          <p>عندما يرسل زائر رسالة من صفحة التواصل ستظهر مباشرة هنا لإدارتها والرد عليها.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</AdminLayout>
+
+<script is:inline>
+  async function markArchived(id) {
+    try {
+      const res = await fetch('/api/admin/messages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: 'archived' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const el = document.getElementById(`msg-${id}`);
+        if (el) el.style.opacity = '0.5';
+        alert('تمت أرشفة الرسالة.');
+      }
+    } catch (e) {
+      alert('حدث خطأ.');
+    }
+  }
+</script>

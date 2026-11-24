@@ -1,0 +1,108 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getAdminItems } from '../../../lib/db';
+
+const items = await getAdminItems();
+---
+
+<AdminLayout title="إدارة محتويات المكتبة (CRUD)">
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-[#5A6578]">عرض وتعديل وحذف كافة المصنفات والمواد المنشورة أو المسودات</p>
+      </div>
+      <a
+        href="/admin/items/new"
+        class="py-2.5 px-4 bg-[#143D33] hover:bg-[#1F5A4B] text-white text-xs font-bold rounded-lg shadow transition-colors flex items-center gap-2"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>إضافة عمل جديد</span>
+      </a>
+    </div>
+
+    <!-- جدول إدارة المحتوى -->
+    <div class="bg-white rounded-xl border border-[#E2DCD0] shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-[#FAF7F0] border-b border-[#E2DCD0] text-[#143D33] font-bold">
+            <tr>
+              <th class="p-4">النوع</th>
+              <th class="p-4">العنوان</th>
+              <th class="p-4">المؤلف</th>
+              <th class="p-4">الحالة</th>
+              <th class="p-4">المشاهدات</th>
+              <th class="p-4">التحميلات</th>
+              <th class="p-4 text-center">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#E2DCD0]/60">
+            {items.map((item) => (
+              <tr class="hover:bg-gray-50/80 transition-colors" id={`row-${item.id}`}>
+                <td class="p-4">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#143D33]/10 text-[#143D33]">
+                    {item.type}
+                  </span>
+                </td>
+                <td class="p-4 font-bold text-[#151C24] max-w-xs truncate">
+                  {item.title}
+                </td>
+                <td class="p-4 text-[#5A6578]">{item.author}</td>
+                <td class="p-4">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800">
+                    {item.status === 'published' ? 'منشور' : 'مسودة'}
+                  </span>
+                </td>
+                <td class="p-4 font-sans font-semibold text-gray-600">{item.view_count}</td>
+                <td class="p-4 font-sans font-semibold text-gray-600">{item.download_count}</td>
+                <td class="p-4 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <a
+                      href={`/${item.type === 'book' ? 'books' : item.type === 'research' ? 'research' : item.type === 'article' ? 'articles' : item.type === 'lecture' ? 'lectures' : item.type === 'literature' ? 'literature' : 'educational'}/${item.slug}`}
+                      target="_blank"
+                      class="px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded font-semibold"
+                    >
+                      معاينة
+                    </a>
+                    <button
+                      onclick={`deleteItem('${item.id}', '${item.title}')`}
+                      class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded font-semibold"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script is:inline>
+  async function deleteItem(id, title) {
+    if (!confirm(`هل أنت متأكد من حذف العمل: "${title}"؟`)) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/items', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const row = document.getElementById(`row-${id}`);
+        if (row) row.remove();
+        alert('تم حذف العمل بنجاح.');
+      } else {
+        alert('حدث خطأ أثناء الحذف.');
+      }
+    } catch (e) {
+      alert('تعذر الاتصال بالخادم.');
+    }
+  }
+</script>

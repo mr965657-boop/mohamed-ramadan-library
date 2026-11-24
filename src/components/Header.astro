@@ -1,0 +1,113 @@
+---
+interface Props {
+  currentPath?: string;
+  lang?: 'ar' | 'en';
+}
+
+const { currentPath = '/', lang = 'ar' } = Astro.props;
+
+const navLinks = [
+  { href: '/', label: 'الرئيسية', labelEn: 'Home' },
+  { href: '/books', label: 'الكتب والمؤلفات', labelEn: 'Books' },
+  { href: '/research', label: 'البحوث والدراسات', labelEn: 'Research' },
+  { href: '/articles', label: 'المقالات', labelEn: 'Articles' },
+  { href: '/lectures', label: 'المحاضرات', labelEn: 'Lectures' },
+  { href: '/literature', label: 'الأعمال الأدبية', labelEn: 'Literature' },
+  { href: '/educational', label: 'المواد التعليمية', labelEn: 'Educational' },
+  { href: '/about', label: 'عن المؤلف', labelEn: 'About' },
+  { href: '/contact', label: 'تواصل', labelEn: 'Contact' },
+];
+---
+
+<header class="sticky top-0 z-40 bg-[#F7F3E9]/95 dark:bg-[#0F141C]/95 backdrop-blur border-b border-[#E2DCD0] dark:border-[#2B384E] transition-colors">
+  <!-- شريط علوي ذهبي رفيع -->
+  <div class="h-1 bg-gradient-to-r from-[#143D33] via-[#B8924A] to-[#1B365D]"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      
+      <!-- شعار وهوية المكتبة -->
+      <a href="/" class="flex items-center gap-3.5 group">
+        <div class="w-11 h-11 rounded-lg bg-[#143D33] text-[#B8924A] flex items-center justify-center font-amiri font-bold text-2xl shadow-md border border-[#B8924A]/40 group-hover:scale-105 transition-transform">
+          م
+        </div>
+        <div>
+          <span class="block font-amiri font-bold text-xl sm:text-2xl text-[#143D33] dark:text-[#E5E9F0] leading-none tracking-tight">
+            مكتبة محمد رمضان
+          </span>
+          <span class="block text-[11px] font-sans text-[#B8924A] font-medium tracking-wider uppercase mt-1">
+            Mohamed Ramadan Digital Library
+          </span>
+        </div>
+      </a>
+
+      <!-- محرك البحث السريع -->
+      <div class="hidden md:flex items-center flex-1 max-w-xs mx-8">
+        <form action="/search" method="GET" class="w-full relative">
+          <input
+            type="search"
+            name="q"
+            placeholder="ابحث في الكتب والمقالات والمحاضرات..."
+            class="w-full pl-4 pr-10 py-2 text-sm bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-[#2B384E] rounded-full focus:outline-none focus:ring-2 focus:ring-[#B8924A] focus:border-transparent text-[#151C24] dark:text-[#E5E9F0] placeholder-[#5A6578]"
+          />
+          <button type="submit" aria-label="بحث" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5A6578] hover:text-[#143D33] transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- الإجراءات السريعة ولوحة الإدارة -->
+      <div class="flex items-center gap-3">
+        <!-- زر البحث للهواتف -->
+        <a href="/search" class="md:hidden p-2 text-[#151C24] dark:text-[#E5E9F0] hover:text-[#B8924A]" aria-label="البحث">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </a>
+
+        <!-- رابط لوحة الإدارة -->
+        <a
+          href="/admin"
+          class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-md border border-[#143D33] text-[#143D33] dark:border-[#B8924A] dark:text-[#B8924A] hover:bg-[#143D33] hover:text-white dark:hover:bg-[#B8924A] dark:hover:text-[#0F141C] transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+          </svg>
+          <span>لوحة التحكم</span>
+        </a>
+
+        <!-- تبديل اللغة -->
+        <button
+          type="button"
+          onclick="alert('الموقع معد لدعم الترجمة الكاملة (عربي / إنجليزي)')"
+          class="px-2.5 py-1 text-xs font-bold rounded text-[#1B365D] dark:text-[#E5E9F0] hover:bg-black/5 dark:hover:bg-white/10 transition-colors border border-transparent hover:border-[#E2DCD0]"
+          title="تبديل اللغة / Switch Language"
+        >
+          EN
+        </button>
+      </div>
+
+    </div>
+
+    <!-- شريط التنقل بين الأقسام الستة -->
+    <nav class="flex items-center gap-1 overflow-x-auto py-2.5 border-t border-[#E2DCD0]/60 dark:border-[#2B384E]/60 text-sm no-scrollbar">
+      {navLinks.map((link) => {
+        const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
+        return (
+          <a
+            href={link.href}
+            class={`whitespace-nowrap px-3 py-1 rounded-md transition-all font-medium ${
+              isActive
+                ? 'bg-[#143D33] text-white dark:bg-[#B8924A] dark:text-[#0F141C] font-semibold shadow-sm'
+                : 'text-[#151C24] dark:text-[#E5E9F0] hover:text-[#143D33] dark:hover:text-[#B8924A] hover:bg-black/5 dark:hover:bg-white/5'
+            }`}
+          >
+            {lang === 'ar' ? link.label : link.labelEn}
+          </a>
+        );
+      })}
+    </nav>
+  </div>
+</header>

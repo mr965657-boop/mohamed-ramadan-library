@@ -1,0 +1,77 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getItemBySlug } from '../../lib/db';
+
+const { slug } = Astro.params;
+const lecture = await getItemBySlug(slug as string, 'ar');
+
+if (!lecture || lecture.type !== 'lecture') {
+  return Astro.redirect('/lectures');
+}
+---
+
+<Layout title={lecture.title} description={lecture.excerpt || lecture.title}>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Breadcrumb -->
+    <nav class="text-xs text-[#5A6578] mb-6 flex items-center gap-2">
+      <a href="/" class="hover:underline">الرئيسية</a>
+      <span>/</span>
+      <a href="/lectures" class="hover:underline">المحاضرات والدروس</a>
+      <span>/</span>
+      <span class="text-[#1B365D] font-semibold">{lecture.title}</span>
+    </nav>
+
+    <div class="bg-white dark:bg-[#1A2433] rounded-2xl p-6 sm:p-10 border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm">
+      <header class="mb-6">
+        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">محاضرة صوتية</span>
+        <h1 class="text-3xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] mt-2">
+          {lecture.title}
+        </h1>
+        <p class="text-xs text-[#5A6578] mt-2">
+          المحاضر: <strong class="text-[#143D33]">{lecture.author}</strong> | المدة: 6:12 دقيقة
+        </p>
+      </header>
+
+      <!-- مشغل الصوتيات الرئيسي المتقدم -->
+      <div class="bg-[#1B365D] text-white p-6 rounded-xl shadow-inner mb-8">
+        <p class="text-xs text-[#B8924A] font-bold mb-3">مشغل المحاضرة</p>
+        <audio controls class="w-full" id="main-audio">
+          <source src={lecture.file_url || ''} type="audio/mpeg" />
+          متصفحك لا يدعم مشغل الصوتيات.
+        </audio>
+        {lecture.allow_download && lecture.file_url && (
+          <div class="mt-4 flex justify-end">
+            <a
+              href={lecture.file_url}
+              download
+              class="px-3 py-1.5 bg-[#B8924A] text-[#143D33] text-xs font-bold rounded hover:bg-[#D4B06A] transition-colors"
+            >
+              تحميل الملف الصوتي MP3
+            </a>
+          </div>
+        )}
+      </div>
+
+      <!-- نبذة وتفريغ نصي -->
+      <div class="space-y-6">
+        <div>
+          <h2 class="font-amiri font-bold text-xl text-[#143D33] dark:text-[#E5E9F0] mb-2 border-b border-[#E2DCD0] pb-2">
+            موجز المحاضرة
+          </h2>
+          <p class="text-sm text-[#151C24] dark:text-[#E5E9F0] leading-relaxed">{lecture.excerpt}</p>
+        </div>
+
+        {lecture.audio_transcript && (
+          <div>
+            <h2 class="font-amiri font-bold text-xl text-[#143D33] dark:text-[#E5E9F0] mb-2 border-b border-[#E2DCD0] pb-2">
+              التفريغ النصي للمحاضرة
+            </h2>
+            <div class="p-5 bg-[#FAF7F0] dark:bg-[#151D28] rounded-xl border border-[#E2DCD0] text-sm leading-relaxed font-naskh">
+              {lecture.audio_transcript}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</Layout>

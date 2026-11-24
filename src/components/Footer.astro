@@ -1,0 +1,94 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-20 bg-[#143D33] text-[#F7F3E9] border-t-4 border-[#B8924A] relative overflow-hidden">
+  <!-- زخرفة هندسية هادئة في الخلفية -->
+  <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(#B8924A_1px,transparent_1px)] [background-size:16px_16px]"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
+      
+      <!-- تعريف المكتبة -->
+      <div class="md:col-span-2 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded bg-[#B8924A] text-[#143D33] font-amiri font-bold text-2xl flex items-center justify-center">
+            م
+          </div>
+          <span class="font-amiri font-bold text-2xl text-[#F7F3E9]">مكتبة محمد رمضان المعرفية</span>
+        </div>
+        <p class="text-sm text-[#F7F3E9]/80 leading-relaxed max-w-md">
+          منصة معرفية وثقافية تجمع بين التراث الإسلامي الرصين والرؤية الرقمية المعاصرة؛ لتيسير القراءة والبحث العلمي، وتقديم فضاء معرفي متكامل يخدم الباحثين والقراء.
+        </p>
+        <div class="pt-2 text-xs text-[#B8924A] flex items-center gap-4">
+          <span>✓ محتوى موثوق ومحقق</span>
+          <span>✓ قارئ كتب تفاعلي متقدم</span>
+          <span>✓ قراءة دون اتصال PWA</span>
+        </div>
+      </div>
+
+      <!-- روابط الأقسام -->
+      <div>
+        <h3 class="font-amiri font-bold text-lg text-[#B8924A] mb-4">أقسام المكتبة</h3>
+        <ul class="space-y-2 text-sm text-[#F7F3E9]/85">
+          <li><a href="/books" class="hover:text-[#B8924A] transition-colors">الكتب والمؤلفات</a></li>
+          <li><a href="/research" class="hover:text-[#B8924A] transition-colors">البحوث والدراسات</a></li>
+          <li><a href="/articles" class="hover:text-[#B8924A] transition-colors">المقالات الفكرية</a></li>
+          <li><a href="/lectures" class="hover:text-[#B8924A] transition-colors">المحاضرات والدروس</a></li>
+          <li><a href="/literature" class="hover:text-[#B8924A] transition-colors">الأعمال الأدبية</a></li>
+          <li><a href="/educational" class="hover:text-[#B8924A] transition-colors">المواد التعليمية</a></li>
+        </ul>
+      </div>
+
+      <!-- الاشتراك في النشرة البريدية -->
+      <div>
+        <h3 class="font-amiri font-bold text-lg text-[#B8924A] mb-4">النشرة المعرفية</h3>
+        <p class="text-xs text-[#F7F3E9]/75 mb-3 leading-relaxed">
+          اشترك ليصلك جديد الكتب المنشورة، والبحوث الأكاديمية، والتسجيلات المسموعة أولاً بأول.
+        </p>
+        <form id="newsletter-form" class="space-y-2">
+          <input
+            type="email"
+            id="newsletter-email"
+            required
+            placeholder="بريدك الإلكتروني..."
+            class="w-full px-3.5 py-2 text-sm bg-white/10 border border-white/20 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#B8924A]"
+          />
+          <button
+            type="submit"
+            class="w-full py-2 px-4 bg-[#B8924A] hover:bg-[#D4B06A] text-[#143D33] font-semibold text-xs rounded transition-colors uppercase tracking-wider"
+          >
+            اشتراك في النشرة
+          </button>
+          <div id="newsletter-msg" class="hidden text-xs text-[#B8924A] mt-1 text-center font-medium"></div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- الشريط السفلي -->
+    <div class="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-[#F7F3E9]/60 gap-4">
+      <div>
+        جميع الحقوق محفوظة © {year} مكتبة محمد رمضان الرقمية.
+      </div>
+      <div class="flex items-center gap-6">
+        <a href="/about" class="hover:text-[#B8924A]">عن المؤلف</a>
+        <a href="/contact" class="hover:text-[#B8924A]">تواصل معنا</a>
+        <a href="/admin" class="hover:text-[#B8924A]">دخول الإدارة</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const form = document.getElementById('newsletter-form');
+  const msg = document.getElementById('newsletter-msg');
+  if (form && msg) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      msg.textContent = 'شكرًا لاشتراكك! تم تسجيل بريدك بنجاح.';
+      msg.classList.remove('hidden');
+      form.reset();
+    });
+  }
+</script>

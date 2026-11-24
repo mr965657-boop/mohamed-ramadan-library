@@ -1,0 +1,94 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAdminStats, getAdminItems, getAdminMessages } from '../../lib/db';
+
+const stats = await getAdminStats();
+const recentItems = (await getAdminItems()).slice(0, 5);
+const recentMessages = (await getAdminMessages()).slice(0, 5);
+---
+
+<AdminLayout title="نظرة عامة وإحصائيات المنصة">
+  <div class="space-y-8">
+    
+    <!-- بطاقات الإحصائيات السريعة -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">
+        <span class="text-xs font-bold text-[#5A6578]">إجمالي الكتب المنشورة</span>
+        <p class="text-3xl font-amiri font-bold text-[#143D33] mt-2">{stats.totalBooks}</p>
+        <span class="text-[11px] text-green-700 font-semibold mt-1 inline-block">✓ ملفات PDF مفهرسة</span>
+      </div>
+
+      <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">
+        <span class="text-xs font-bold text-[#5A6578]">البحوث والمقالات</span>
+        <p class="text-3xl font-amiri font-bold text-[#1B365D] mt-2">{stats.totalResearch + stats.totalArticles}</p>
+        <span class="text-[11px] text-[#5A6578] mt-1 inline-block">دراسات ومقالات فكرية</span>
+      </div>
+
+      <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">
+        <span class="text-xs font-bold text-[#5A6578]">المحاضرات الصوتية</span>
+        <p class="text-3xl font-amiri font-bold text-[#B8924A] mt-2">{stats.totalLectures}</p>
+        <span class="text-[11px] text-[#5A6578] mt-1 inline-block">تسجيلات وسلاسل مسموعة</span>
+      </div>
+
+      <div class="p-6 bg-white rounded-xl border border-[#E2DCD0] shadow-sm">
+        <span class="text-xs font-bold text-[#5A6578]">الرسائل الجديدة</span>
+        <p class="text-3xl font-amiri font-bold text-red-600 mt-2">{stats.newMessagesCount}</p>
+        <a href="/admin/messages" class="text-[11px] text-[#143D33] font-bold underline mt-1 inline-block">
+          معاينة صندوق الرسائل ←
+        </a>
+      </div>
+    </div>
+
+    <!-- شبكة الجداول: أحدث المحتويات وأحدث الرسائل -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- أحدث المحتويات المضافة -->
+      <div class="bg-white rounded-xl border border-[#E2DCD0] p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#E2DCD0]">
+          <h2 class="font-amiri font-bold text-lg text-[#143D33]">أحدث المحتويات في المنصة</h2>
+          <a href="/admin/items" class="text-xs font-bold text-[#143D33] hover:underline">عرض الكل ←</a>
+        </div>
+
+        <div class="space-y-3">
+          {recentItems.map((item) => (
+            <div class="flex items-center justify-between p-3 rounded-lg bg-[#FAF7F0] border border-[#E2DCD0]/60">
+              <div class="overflow-hidden">
+                <span class="text-[10px] px-2 py-0.5 rounded bg-[#143D33] text-white font-bold ml-2">
+                  {item.type}
+                </span>
+                <span class="font-bold text-xs text-[#151C24]">{item.title}</span>
+              </div>
+              <span class="text-[11px] text-green-700 font-bold shrink-0">منشور</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- أحدث رسائل التواصل الواردة -->
+      <div class="bg-white rounded-xl border border-[#E2DCD0] p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-[#E2DCD0]">
+          <h2 class="font-amiri font-bold text-lg text-[#143D33]">رسائل التواصل الأخيرة</h2>
+          <a href="/admin/messages" class="text-xs font-bold text-[#143D33] hover:underline">عرض الصندوق ←</a>
+        </div>
+
+        {recentMessages.length > 0 ? (
+          <div class="space-y-3">
+            {recentMessages.map((msg) => (
+              <div class="p-3 rounded-lg bg-[#FAF7F0] border border-[#E2DCD0]/60 text-xs">
+                <div class="flex justify-between font-bold text-[#143D33]">
+                  <span>{msg.name} ({msg.category})</span>
+                  <span class="text-[10px] text-gray-500">{new Date(msg.created_at).toLocaleDateString('ar-EG')}</span>
+                </div>
+                <p class="text-[#5A6578] mt-1 line-clamp-1">{msg.message}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="text-xs text-[#5A6578] text-center py-8">لا توجد رسائل جديدة حالياً.</p>
+        )}
+      </div>
+
+    </div>
+
+  </div>
+</AdminLayout>

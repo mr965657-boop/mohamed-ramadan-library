@@ -1,0 +1,75 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  keywords?: string[];
+  image?: string;
+  type?: 'website' | 'article' | 'book';
+  lang?: 'ar' | 'en';
+  canonical?: string;
+}
+
+const {
+  title,
+  description = 'مكتبة محمد رمضان المعرفية الرقمية - منصة علمية وبحثية تجمع بين التراث الإسلامي والأصالة المعاصرة في بيئة قراءة وبحث متطورة.',
+  keywords = ['مكتبة محمد رمضان', 'كتب إسلامية', 'بحوث أكاديمية', 'مقالات فكرية', 'محاضرات صوتية'],
+  image = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1200',
+  type = 'website',
+  lang = 'ar',
+  canonical = Astro.url.href,
+} = Astro.props;
+
+const isRTL = lang === 'ar';
+---
+
+<!doctype html>
+<html lang={lang} dir={isRTL ? 'rtl' : 'ltr'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | مكتبة محمد رمضان</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords.join(', ')} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={`${title} | مكتبة محمد رمضان`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:locale" content={isRTL ? 'ar_AR' : 'en_US'} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={`${title} | مكتبة محمد رمضان`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <!-- الأيقونات والسمة اللونية وتطبيق PWA -->
+    <meta name="theme-color" content="#143D33" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body class="min-h-screen flex flex-col bg-[#F7F3E9] text-[#151C24] dark:bg-[#0F141C] dark:text-[#E5E9F0] antialiased selection:bg-[#B8924A]/30 selection:text-[#143D33]">
+    <Header currentPath={Astro.url.pathname} lang={lang} />
+    
+    <main class="flex-1 w-full">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

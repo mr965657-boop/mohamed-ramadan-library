@@ -1,0 +1,327 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getItems, getCategories } from '../lib/db';
+
+const books = await getItems({ type: 'book', limit: 3 });
+const research = await getItems({ type: 'research', limit: 3 });
+const articles = await getItems({ type: 'article', limit: 3 });
+const lectures = await getItems({ type: 'lecture', limit: 2 });
+const literature = await getItems({ type: 'literature', limit: 2 });
+const educational = await getItems({ type: 'educational', limit: 2 });
+const categories = await getCategories();
+---
+
+<Layout title="الرئيسية | منصة المعرفة والتراث">
+  <!-- 1. القسم الترحيبي (Hero Section) مع مساحة لصورة وتعريف المؤلف -->
+  <section class="relative overflow-hidden bg-gradient-to-b from-[#143D33] via-[#143D33]/95 to-[#143D33] text-[#F7F3E9] py-16 sm:py-24 border-b-2 border-[#B8924A]">
+    <!-- نقوش خلفية إسلامية هادئة -->
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#B8924A_1.5px,transparent_1.5px)] [background-size:24px_24px] pointer-events-none"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- التعريف بالمكتبة والمؤلف ومحرك البحث -->
+        <div class="lg:col-span-7 space-y-6 text-center lg:text-right">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#B8924A]/40 bg-[#B8924A]/10 text-[#B8924A] text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-[#B8924A] animate-pulse"></span>
+            منصة معرفية رقمية متكاملة
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-amiri font-bold text-[#F7F3E9] leading-tight">
+            مكتبة محمد رمضان
+            <span class="block text-2xl sm:text-3xl font-normal text-[#B8924A] mt-2 font-ruqaa">
+              أصالة التراث.. وعمق المعرفة المعاصرة
+            </span>
+          </h1>
+
+          <p class="text-base sm:text-lg text-[#F7F3E9]/85 max-w-2xl leading-relaxed">
+            فضاء معرفي رقمي يجمع بين هوية المؤلف والباحث والمعلم، يضع بين يديك أحدث الكتب، والبحوث الأكاديمية المحكمة، والمقالات، والتسجيلات المسموعة مع تجربة قراءة تفاعلية فريدة.
+          </p>
+
+          <!-- محرك البحث البارز في الواجهة -->
+          <div class="pt-4 max-w-xl mx-auto lg:mx-0">
+            <form action="/search" method="GET" class="flex items-center bg-white dark:bg-[#1A2433] rounded-xl shadow-xl overflow-hidden p-1.5 border-2 border-[#B8924A]">
+              <input
+                type="search"
+                name="q"
+                placeholder="ابحث بالعنوان، الكلمات المفتاحية، أو داخل نصوص الكتب..."
+                class="flex-1 px-4 py-3 text-sm text-[#151C24] dark:text-[#E5E9F0] bg-transparent focus:outline-none placeholder-gray-400"
+                required
+              />
+              <button
+                type="submit"
+                class="px-6 py-3 bg-[#143D33] hover:bg-[#1F5A4B] text-[#B8924A] font-semibold text-sm rounded-lg transition-colors flex items-center gap-2"
+              >
+                <span>بحث</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <!-- روابط سريعة للأقسام الشائعة -->
+          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-2 text-xs text-[#F7F3E9]/70">
+            <span>الوصول السريع:</span>
+            <a href="/books" class="underline hover:text-[#B8924A]">فهرس الكتب</a>
+            <span>•</span>
+            <a href="/research" class="underline hover:text-[#B8924A]">الدراسات والبحوث</a>
+            <span>•</span>
+            <a href="/lectures" class="underline hover:text-[#B8924A]">الدروس الصوتية</a>
+            <span>•</span>
+            <a href="/about" class="underline hover:text-[#B8924A]">عن المؤلف</a>
+          </div>
+        </div>
+
+        <!-- بطاقة المؤلف والصورة الشخصية المعبرة -->
+        <div class="lg:col-span-5 flex justify-center">
+          <div class="relative w-72 sm:w-80 p-3 bg-[#FAF7F0] dark:bg-[#1A2433] rounded-2xl shadow-2xl border-2 border-[#B8924A]/50 transform hover:-translate-y-1 transition-transform">
+            <!-- إطار الصورة -->
+            <div class="aspect-[4/5] rounded-xl overflow-hidden bg-[#E2DCD0] relative">
+              <img
+                src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800"
+                alt="محمد رمضان - باحث ومؤلف"
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
+                <div class="text-white text-right">
+                  <p class="font-amiri font-bold text-xl">أ. محمد رمضان</p>
+                  <p class="text-xs text-[#B8924A] font-sans">باحث، مؤلف، ومحاضر</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- مقتطف تعريفي موجز -->
+            <div class="p-3 text-center text-xs text-[#151C24] dark:text-[#E5E9F0]">
+              <p class="line-clamp-2">مهتم بقضايا التراث، تحقيق النصوص، ومناهج الفكر الإسلامي المعاصر.</p>
+              <a href="/about" class="inline-block mt-2 font-bold text-[#143D33] dark:text-[#B8924A] hover:underline">
+                السيرة الذاتية الكاملة ←
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. التصنيفات الرئيسية للمكتبة (Categories Grid) -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <h2 class="text-3xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">أقسام المكتبة المعرفية</h2>
+      <p class="text-sm text-[#5A6578] dark:text-gray-400 mt-2">استكشف الإنتاج العلمي والأدبي موزّعاً حسب الحقول والموضوعات</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {categories.map((cat) => (
+        <a
+          href={`/${cat.slug}`}
+          class="p-5 rounded-xl bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-[#2B384E] text-center hover:border-[#B8924A] hover:shadow-md transition-all group"
+        >
+          <div class="w-12 h-12 mx-auto rounded-full bg-[#143D33]/10 dark:bg-[#B8924A]/20 text-[#143D33] dark:text-[#B8924A] flex items-center justify-center font-bold font-amiri text-xl group-hover:scale-110 transition-transform">
+            {cat.name_ar.slice(0, 1)}
+          </div>
+          <h3 class="font-amiri font-bold text-base mt-3 text-[#151C24] dark:text-[#E5E9F0] group-hover:text-[#143D33] dark:group-hover:text-[#B8924A] transition-colors">
+            {cat.name_ar}
+          </h3>
+          <p class="text-[11px] text-[#5A6578] dark:text-gray-400 mt-1 line-clamp-1">
+            {cat.description_ar}
+          </p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- 3. أحدث الكتب والمؤلفات (Featured Books) -->
+  <section class="bg-[#FAF7F0] dark:bg-[#151D28] py-14 border-y border-[#E2DCD0] dark:border-[#2B384E]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <span class="text-xs font-bold text-[#B8924A] tracking-wider uppercase">الإصدارات</span>
+          <h2 class="text-2xl sm:text-3xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0]">أحدث الكتب والمؤلفات</h2>
+        </div>
+        <a href="/books" class="text-sm font-bold text-[#143D33] dark:text-[#B8924A] hover:underline flex items-center gap-1">
+          عرض جميع الكتب ←
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {books.map((book) => (
+          <article class="bg-white dark:bg-[#1A2433] rounded-xl overflow-hidden border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm hover:shadow-md transition-shadow flex flex-col">
+            <div class="aspect-[16/10] bg-[#E2DCD0] relative overflow-hidden">
+              <img
+                src={book.cover_image_url || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=600'}
+                alt={book.title}
+                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+              <div class="absolute top-3 right-3 bg-[#143D33] text-white text-[11px] font-semibold px-2.5 py-1 rounded">
+                كتاب
+              </div>
+            </div>
+            
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-amiri font-bold text-xl text-[#151C24] dark:text-[#E5E9F0] hover:text-[#143D33] dark:hover:text-[#B8924A] transition-colors leading-snug">
+                  <a href={`/books/${book.slug}`}>{book.title}</a>
+                </h3>
+                <p class="text-xs text-[#5A6578] dark:text-gray-400 mt-2 line-clamp-3 leading-relaxed">
+                  {book.excerpt}
+                </p>
+              </div>
+
+              <div class="mt-5 pt-4 border-t border-[#E2DCD0]/60 dark:border-[#2B384E]/60 flex items-center justify-between">
+                <span class="text-xs text-[#5A6578] dark:text-gray-400">{book.page_count ? `${book.page_count} صفحة` : 'نسخة رقمية'}</span>
+                <div class="flex items-center gap-2">
+                  <a
+                    href={`/books/${book.slug}`}
+                    class="px-3 py-1.5 text-xs font-bold rounded bg-[#143D33] text-[#F7F3E9] hover:bg-[#1F5A4B] transition-colors"
+                  >
+                    قراءة داخل الموقع
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. البحوث والمقالات (Research & Articles) -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      
+      <!-- عمود البحوث والدراسات -->
+      <div>
+        <div class="flex items-center justify-between mb-6 pb-3 border-b border-[#E2DCD0] dark:border-[#2B384E]">
+          <h2 class="text-2xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#1B365D]"></span>
+            البحوث والدراسات الأكاديمية
+          </h2>
+          <a href="/research" class="text-xs font-bold text-[#1B365D] dark:text-[#B8924A] hover:underline">المزيد ←</a>
+        </div>
+
+        <div class="space-y-4">
+          {research.map((res) => (
+            <article class="p-4 rounded-xl bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-[#2B384E] hover:border-[#1B365D] transition-colors">
+              <h3 class="font-amiri font-bold text-lg text-[#151C24] dark:text-[#E5E9F0] hover:text-[#1B365D] transition-colors">
+                <a href={`/research/${res.slug}`}>{res.title}</a>
+              </h3>
+              <p class="text-xs text-[#5A6578] dark:text-gray-400 mt-2 line-clamp-2 leading-relaxed">
+                {res.excerpt}
+              </p>
+              <div class="mt-3 flex items-center justify-between text-[11px] text-[#5A6578]">
+                <span>المؤلف: {res.author}</span>
+                <a href={`/research/${res.slug}`} class="font-bold text-[#1B365D] hover:underline">قراءة البحث ←</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <!-- عمود المقالات الفكرية -->
+      <div>
+        <div class="flex items-center justify-between mb-6 pb-3 border-b border-[#E2DCD0] dark:border-[#2B384E]">
+          <h2 class="text-2xl font-amiri font-bold text-[#143D33] dark:text-[#E5E9F0] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#B8924A]"></span>
+            أحدث المقالات الفكرية
+          </h2>
+          <a href="/articles" class="text-xs font-bold text-[#B8924A] hover:underline">المزيد ←</a>
+        </div>
+
+        <div class="space-y-4">
+          {articles.map((art) => (
+            <article class="p-4 rounded-xl bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-[#2B384E] hover:border-[#B8924A] transition-colors">
+              <h3 class="font-amiri font-bold text-lg text-[#151C24] dark:text-[#E5E9F0] hover:text-[#B8924A] transition-colors">
+                <a href={`/articles/${art.slug}`}>{art.title}</a>
+              </h3>
+              <p class="text-xs text-[#5A6578] dark:text-gray-400 mt-2 line-clamp-2 leading-relaxed">
+                {art.excerpt}
+              </p>
+              <div class="mt-3 flex items-center justify-between text-[11px] text-[#5A6578]">
+                <span>مدة القراءة: ~{art.reading_time_minutes} دقائق</span>
+                <a href={`/articles/${art.slug}`} class="font-bold text-[#143D33] dark:text-[#B8924A] hover:underline">قراءة المقال ←</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 5. المحاضرات والدروس الصوتية المسموعة (Lectures & Audio) -->
+  <section class="bg-[#1B365D] text-white py-14 border-t-2 border-[#B8924A]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">التسجيلات والدروس</span>
+          <h2 class="text-2xl sm:text-3xl font-amiri font-bold text-white">المحاضرات والدروس المسموعة</h2>
+        </div>
+        <a href="/lectures" class="text-sm font-bold text-[#B8924A] hover:underline">جميع المحاضرات ←</a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {lectures.map((lec) => (
+          <div class="bg-white/10 backdrop-blur rounded-xl p-5 border border-white/15 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="px-2 py-0.5 text-[10px] rounded bg-[#B8924A] text-[#143D33] font-bold">تسجيل صوتي MP3</span>
+                <span class="text-xs text-white/70">المدة: 6:12 دقيقة</span>
+              </div>
+              <h3 class="font-amiri font-bold text-xl text-white hover:text-[#B8924A] transition-colors">
+                <a href={`/lectures/${lec.slug}`}>{lec.title}</a>
+              </h3>
+              <p class="text-xs text-white/80 mt-2 line-clamp-2">
+                {lec.excerpt}
+              </p>
+            </div>
+
+            <!-- مشغل صوت بسيط في البطاقة -->
+            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+              <audio controls class="w-full h-8 brightness-90">
+                <source src={lec.file_url || ''} type="audio/mpeg" />
+                متصفحك لا يدعم مشغل الصوتيات.
+              </audio>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. الأعمال الأدبية والمواد التعليمية -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- الأعمال الأدبية -->
+      <div class="p-6 rounded-2xl bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-[#2B384E]">
+        <h3 class="font-amiri font-bold text-2xl text-[#143D33] dark:text-[#E5E9F0] mb-4">الأعمال الأدبية والإبداعية</h3>
+        <p class="text-xs text-[#5A6578] mb-4">نصوص سردية وروايات تأملية تستلهم الحضارة العربية والأندلسية.</p>
+        <div class="space-y-3">
+          {literature.map((lit) => (
+            <div class="p-3 bg-[#FAF7F0] dark:bg-[#151D28] rounded-lg">
+              <h4 class="font-amiri font-bold text-base"><a href={`/literature/${lit.slug}`}>{lit.title}</a></h4>
+              <p class="text-xs text-[#5A6578] mt-1 line-clamp-1">{lit.excerpt}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- المواد التعليمية -->
+      <div class="p-6 rounded-2xl bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-[#2B384E]">
+        <h3 class="font-amiri font-bold text-2xl text-[#143D33] dark:text-[#E5E9F0] mb-4">المواد التعليمية والمناهج</h3>
+        <p class="text-xs text-[#5A6578] mb-4">أدلة تدريبية ومناهج ميسرة لطلاب العلم والباحثين.</p>
+        <div class="space-y-3">
+          {educational.map((edu) => (
+            <div class="p-3 bg-[#FAF7F0] dark:bg-[#151D28] rounded-lg">
+              <h4 class="font-amiri font-bold text-base"><a href={`/educational/${edu.slug}`}>{edu.title}</a></h4>
+              <p class="text-xs text-[#5A6578] mt-1 line-clamp-1">{edu.excerpt}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+</Layout>
