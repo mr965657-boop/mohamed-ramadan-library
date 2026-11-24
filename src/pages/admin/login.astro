@@ -1,0 +1,137 @@
+---
+import { verifyAdminSession } from '../../lib/auth';
+
+const auth = await verifyAdminSession(Astro.request, 'reader');
+if (auth.authorized) {
+  return Astro.redirect('/admin');
+}
+---
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسجيل دخول الإدارة | مكتبة محمد رمضان</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      body {
+        background-color: #143D33;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex items-center justify-center p-4 antialiased">
+    
+    <div class="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 shadow-2xl border-4 border-[#B8924A]/40 relative overflow-hidden">
+      <!-- زخرفة علوية خفيفة -->
+      <div class="text-center mb-8">
+        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-[#143D33] text-[#B8924A] font-amiri font-bold text-3xl flex items-center justify-center shadow-md">
+          م
+        </div>
+        <h1 class="font-amiri font-bold text-2xl text-[#143D33]">مكتبة محمد رمضان المعرفية</h1>
+        <p class="text-xs text-[#5A6578] mt-1 font-sans tracking-wider">لوحة التحكم والإدارة الأكاديمية</p>
+      </div>
+
+      <!-- نموذج تسجيل الدخول -->
+      <form id="login-form" class="space-y-5">
+        <div>
+          <label class="block text-xs font-bold text-[#143D33] mb-2">
+            البريد الإلكتروني أو اسم المستخدم
+          </label>
+          <input
+            type="text"
+            id="email-input"
+            required
+            value="admin@mohamed-ramadan.com"
+            placeholder="admin@mohamed-ramadan.com"
+            class="w-full px-4 py-3 text-xs rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#143D33] font-sans"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-[#143D33] mb-2">
+            كلمة المرور السرية (Password)
+          </label>
+          <input
+            type="password"
+            id="password-input"
+            required
+            placeholder="••••••••••••"
+            class="w-full px-4 py-3 text-xs rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#143D33] font-sans"
+          />
+        </div>
+
+        <div id="login-msg" class="hidden p-3 rounded-xl text-xs font-bold text-center"></div>
+
+        <button
+          type="submit"
+          id="login-btn"
+          class="w-full py-3.5 px-4 bg-[#143D33] hover:bg-[#1C5346] text-white font-bold text-sm rounded-xl transition-all shadow-md active:scale-98"
+        >
+          دخول لوحة التحكم ←
+        </button>
+      </form>
+
+      <!-- تلميح الأمان والمساعدة -->
+      <div class="mt-6 pt-5 border-t border-gray-200 text-center space-y-2">
+        <p class="text-[11px] text-[#5A6578]">
+          كلمة المرور الافتراضية للنظام: <strong class="text-[#143D33] font-mono">Ramadan2026!</strong>
+        </p>
+        <div>
+          <a href="/" class="text-xs text-[#B8924A] hover:underline font-bold inline-block">
+            ← العودة للموقع العام
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <script is:inline>
+      const form = document.getElementById('login-form');
+      const emailInput = document.getElementById('email-input');
+      const passInput = document.getElementById('password-input');
+      const msgBox = document.getElementById('login-msg');
+      const submitBtn = document.getElementById('login-btn');
+
+      if (form && emailInput && passInput && submitBtn) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'جارٍ التحقق...';
+          msgBox.className = 'hidden';
+
+          try {
+            const res = await fetch('/api/admin/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: emailInput.value.trim(),
+                password: passInput.value,
+              }),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+              msgBox.textContent = 'تم تسجيل الدخول بنجاح! جارٍ تحويلك...';
+              msgBox.className = 'p-3 rounded-xl text-xs font-bold text-center bg-green-100 text-green-800 block';
+              setTimeout(() => {
+                window.location.href = '/admin';
+              }, 600);
+            } else {
+              msgBox.textContent = data.error || 'بيانات الدخول غير صحيحة';
+              msgBox.className = 'p-3 rounded-xl text-xs font-bold text-center bg-red-100 text-red-800 block';
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'دخول لوحة التحكم ←';
+            }
+          } catch (err) {
+            msgBox.textContent = 'تعذر الاتصال بالخادم، يرجى المحاولة لاحقاً';
+            msgBox.className = 'p-3 rounded-xl text-xs font-bold text-center bg-red-100 text-red-800 block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'دخول لوحة التحكم ←';
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

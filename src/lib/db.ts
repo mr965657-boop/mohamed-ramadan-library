@@ -721,6 +721,22 @@ export async function getItemBySlug(slug: string, language: 'ar' | 'en' = 'ar'):
   return memoryItems.find((i) => i.slug === slug && i.language === language) || null;
 }
 
+export async function getItemById(id: string): Promise<Item | null> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('items')
+        .select('*, category:categories(*)')
+        .eq('id', id)
+        .single();
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn('Fallback to local getItemById');
+    }
+  }
+  return memoryItems.find((i) => i.id === id) || null;
+}
+
 // محرك البحث الذكي متعدد الأوجه (Faceted Search Engine) بدعم تطبيع النصوص وفلاتر التصنيف والسنة والباحث
 export async function searchLibrary(
   queryText: string,

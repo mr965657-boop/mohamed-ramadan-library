@@ -87,6 +87,52 @@ export const POST: APIRoute = async ({ request }) => {
   }
 };
 
+export const PUT: APIRoute = async ({ request }) => {
+  const auth = await verifyAdminSession(request, 'author');
+  if (!auth.authorized) {
+    return new Response(JSON.stringify({ error: auth.error || 'غير مصرح' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  try {
+    const data = await request.json();
+    if (!data.id) {
+      return new Response(JSON.stringify({ error: 'معرف العنصر مطلوب للتعديل' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const updated = await updateItem(data.id, {
+      ...data,
+      page_count: data.page_count ? parseInt(data.page_count) : null,
+      reading_time_minutes: data.reading_time_minutes ? parseInt(data.reading_time_minutes) : 5,
+      tags: typeof data.tags === 'string' ? data.tags.split(',').map((t: string) => t.trim()) : data.tags,
+      peer_reviewed: data.peer_reviewed === true || data.peer_reviewed === 'true',
+      is_demo: data.is_demo === true || data.is_demo === 'true',
+    });
+
+    if (!updated) {
+      return new Response(JSON.stringify({ error: 'العنصر غير موجود' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true, item: updated }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'فشل تعديل المحتوى' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+};
+
 export const DELETE: APIRoute = async ({ request }) => {
   const auth = await verifyAdminSession(request, 'editor');
   if (!auth.authorized) {
