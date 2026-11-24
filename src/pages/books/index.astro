@@ -1,25 +1,36 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getItems } from '../../lib/db';
+import { useTranslations, type Language } from '../../lib/i18n';
 
-const books = await getItems({ type: 'book' });
+const lang = (Astro.url.searchParams.get('lang') as Language) || 'ar';
+const t = useTranslations(lang);
+const books = await getItems({ type: 'book', language: lang });
+
+function buildUrl(base: string) {
+  if (lang === 'en') {
+    return base.includes('?') ? `${base}&lang=en` : `${base}?lang=en`;
+  }
+  return base;
+}
 ---
 
-<Layout title="فهرس الكتب والمؤلفات">
+<Layout title={t.books} lang={lang}>
   <div class="bg-[#143D33] text-[#F7F3E9] py-12 border-b-2 border-[#B8924A]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
-        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">المصنفات المطبوعة والرقمية</span>
-        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">فهرس الكتب والمؤلفات</h1>
+        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">{t.books}</span>
+        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">{t.latestBooks}</h1>
         <p class="text-sm text-[#F7F3E9]/80 mt-2 leading-relaxed">
-          تصفح الكتب والمصنفات التخصصية، مع إمكانية القراءة المباشرة داخل المتصفح أو التنزيل بروابط موثوقة.
+          {lang === 'ar' 
+            ? 'تصفح الكتب والمصنفات التخصصية، مع إمكانية القراءة المباشرة داخل المتصفح أو التنزيل بروابط موثوقة.'
+            : 'Browse specialized books and publications with direct in-browser reading or verified download links.'}
         </p>
       </div>
     </div>
   </div>
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <!-- شبكة الكتب -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {books.map((book) => (
         <article class="bg-white dark:bg-[#1A2433] rounded-xl overflow-hidden border border-[#E2DCD0] dark:border-[#2B384E] shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
@@ -30,26 +41,25 @@ const books = await getItems({ type: 'book' });
                 alt={book.title}
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
-              <div class="absolute bottom-3 right-3 bg-[#143D33]/90 text-white text-[11px] font-semibold px-2.5 py-1 rounded backdrop-blur">
-                {book.page_count ? `${book.page_count} صفحة` : 'كتاب رقمي'}
+              <div class="absolute bottom-3 end-3 bg-[#143D33]/90 text-white text-[11px] font-semibold px-2.5 py-1 rounded backdrop-blur">
+                {book.page_count ? `${book.page_count} ${t.pageUnit}` : 'Digital'}
               </div>
             </div>
 
             <div class="p-6">
               <div class="flex items-center gap-2 text-xs text-[#B8924A] font-semibold mb-2">
-                <span>المؤلف: {book.author}</span>
-                {book.allow_download && <span>• متاح للتحميل</span>}
+                <span>{book.author}</span>
+                {book.allow_download && <span>• {lang === 'ar' ? 'متاح للتحميل' : 'Download Available'}</span>}
               </div>
 
               <h2 class="font-amiri font-bold text-xl text-[#151C24] dark:text-[#E5E9F0] hover:text-[#143D33] dark:hover:text-[#B8924A] transition-colors leading-snug">
-                <a href={`/books/${book.slug}`}>{book.title}</a>
+                <a href={buildUrl(`/books/${book.slug}`)}>{book.title}</a>
               </h2>
 
               <p class="text-xs text-[#5A6578] dark:text-gray-400 mt-3 line-clamp-3 leading-relaxed">
                 {book.excerpt}
               </p>
 
-              <!-- الوسوم -->
               <div class="flex flex-wrap gap-1.5 mt-4">
                 {book.tags.map((tag) => (
                   <span class="px-2 py-0.5 text-[10px] rounded bg-[#F7F3E9] dark:bg-[#2B384E] text-[#143D33] dark:text-[#E5E9F0]">
@@ -62,10 +72,10 @@ const books = await getItems({ type: 'book' });
 
           <div class="p-6 pt-0 border-t border-[#E2DCD0]/40 dark:border-[#2B384E]/40 mt-4 flex items-center justify-between gap-3">
             <a
-              href={`/books/${book.slug}`}
+              href={buildUrl(`/books/${book.slug}`)}
               class="flex-1 text-center py-2 px-3 text-xs font-bold rounded-lg bg-[#143D33] text-white hover:bg-[#1F5A4B] transition-colors"
             >
-              قراءة وتفاصيل
+              {lang === 'ar' ? 'قراءة وتفاصيل' : 'Read & Details'}
             </a>
             {book.allow_download && book.file_url && (
               <a
@@ -73,9 +83,8 @@ const books = await getItems({ type: 'book' });
                 target="_blank"
                 download
                 class="py-2 px-3 text-xs font-bold rounded-lg border border-[#143D33] text-[#143D33] hover:bg-black/5 transition-colors"
-                title="تنزيل نسخة PDF"
               >
-                تنزيل PDF
+                {t.downloadPdf}
               </a>
             )}
           </div>

@@ -1,15 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { useTranslations, type Language } from '../lib/i18n';
+
+const lang = (Astro.url.searchParams.get('lang') as Language) || 'ar';
+const t = useTranslations(lang);
 ---
 
-<Layout title="تواصل مع المؤلف والمكتبة">
+<Layout title={t.contactTitle} lang={lang}>
   <div class="bg-[#143D33] text-[#F7F3E9] py-12 border-b-2 border-[#B8924A]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
-        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">قنوات الاتصال المباشرة</span>
-        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">تواصل مع المؤلف وإدارة المكتبة</h1>
+        <span class="text-xs font-bold text-[#B8924A] uppercase tracking-wider">{t.contact}</span>
+        <h1 class="text-3xl sm:text-4xl font-amiri font-bold mt-1 text-[#F7F3E9]">{t.contactTitle}</h1>
         <p class="text-sm text-[#F7F3E9]/80 mt-2 leading-relaxed">
-          يسعدنا استقبال استفساراتكم الأكاديمية، والتعاون العلمي، وملاحظاتكم حول الكتب والمحتوى.
+          {t.contactSubtitle}
         </p>
       </div>
     </div>
@@ -22,21 +26,21 @@ import Layout from '../layouts/Layout.astro';
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label for="name" class="block text-xs font-bold text-[#143D33] dark:text-[#E5E9F0] mb-2">
-              الاسم الكريم <span class="text-red-500">*</span>
+              {t.nameLabel} <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
               id="name"
               name="name"
               required
-              placeholder="مثال: د. أحمد المحمود"
+              placeholder={lang === 'ar' ? 'مثال: د. أحمد المحمود' : 'e.g. Dr. Arthur Miller'}
               class="w-full px-4 py-2.5 text-sm rounded-lg border border-[#E2DCD0] dark:border-[#2B384E] dark:bg-[#151D28] text-[#151C24] dark:text-[#E5E9F0] focus:outline-none focus:ring-2 focus:ring-[#143D33]"
             />
           </div>
 
           <div>
             <label for="email" class="block text-xs font-bold text-[#143D33] dark:text-[#E5E9F0] mb-2">
-              البريد الإلكتروني <span class="text-red-500">*</span>
+              {t.emailLabel} <span class="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -52,7 +56,7 @@ import Layout from '../layouts/Layout.astro';
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label for="category" class="block text-xs font-bold text-[#143D33] dark:text-[#E5E9F0] mb-2">
-              تصنيف الرسالة <span class="text-red-500">*</span>
+              {t.categoryLabel} <span class="text-red-500">*</span>
             </label>
             <select
               id="category"
@@ -60,23 +64,23 @@ import Layout from '../layouts/Layout.astro';
               required
               class="w-full px-4 py-2.5 text-sm rounded-lg border border-[#E2DCD0] dark:border-[#2B384E] dark:bg-[#151D28] text-[#151C24] dark:text-[#E5E9F0] focus:outline-none focus:ring-2 focus:ring-[#143D33]"
             >
-              <option value="books">استفسارات حول الكتب والمؤلفات</option>
-              <option value="research">البحوث والدراسات العلمية</option>
-              <option value="teaching">التدريس والمحاضرات والتعليم</option>
-              <option value="scientific_cooperation">التعاون والمشاريع الأكاديمية</option>
-              <option value="general">استفسار عام أو اقتراح</option>
+              <option value="books">{t.catBooks}</option>
+              <option value="research">{t.catResearch}</option>
+              <option value="teaching">{t.catTeaching}</option>
+              <option value="scientific_cooperation">{t.catCooperation}</option>
+              <option value="general">{t.catGeneral}</option>
             </select>
           </div>
 
           <div>
             <label for="subject" class="block text-xs font-bold text-[#143D33] dark:text-[#E5E9F0] mb-2">
-              موضوع الرسالة
+              {t.subjectLabel}
             </label>
             <input
               type="text"
               id="subject"
               name="subject"
-              placeholder="عنوان موجز لرسالتك"
+              placeholder={lang === 'ar' ? 'عنوان موجز لرسالتك' : 'Brief subject of your inquiry'}
               class="w-full px-4 py-2.5 text-sm rounded-lg border border-[#E2DCD0] dark:border-[#2B384E] dark:bg-[#151D28] text-[#151C24] dark:text-[#E5E9F0] focus:outline-none focus:ring-2 focus:ring-[#143D33]"
             />
           </div>
@@ -84,14 +88,14 @@ import Layout from '../layouts/Layout.astro';
 
         <div>
           <label for="message" class="block text-xs font-bold text-[#143D33] dark:text-[#E5E9F0] mb-2">
-            نص الرسالة <span class="text-red-500">*</span>
+            {t.messageLabel} <span class="text-red-500">*</span>
           </label>
           <textarea
             id="message"
             name="message"
             rows="5"
             required
-            placeholder="اكتب رسالتك وتفاصيل استفسارك هنا..."
+            placeholder={lang === 'ar' ? 'اكتب رسالتك وتفاصيل استفسارك هنا...' : 'Write your detailed message here...'}
             class="w-full px-4 py-3 text-sm rounded-lg border border-[#E2DCD0] dark:border-[#2B384E] dark:bg-[#151D28] text-[#151C24] dark:text-[#E5E9F0] focus:outline-none focus:ring-2 focus:ring-[#143D33]"
           ></textarea>
         </div>
@@ -104,7 +108,7 @@ import Layout from '../layouts/Layout.astro';
             id="submit-btn"
             class="w-full py-3.5 px-6 bg-[#143D33] hover:bg-[#1F5A4B] text-[#F7F3E9] font-amiri font-bold text-lg rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
           >
-            <span>إرسال الرسالة إلى إدارة المكتبة</span>
+            <span>{t.submitMessageBtn}</span>
             <svg class="w-5 h-5 text-[#B8924A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
             </svg>
@@ -116,16 +120,16 @@ import Layout from '../layouts/Layout.astro';
   </div>
 </Layout>
 
-<script>
-  const form = document.getElementById('contact-form') as HTMLFormElement;
-  const alertBox = document.getElementById('form-alert') as HTMLDivElement;
-  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+<script is:inline define:vars={{ sendingText: lang === 'ar' ? 'جارٍ الإرسال...' : 'Sending...', successMsgText: lang === 'ar' ? 'تم إرسال رسالتك بنجاح! وستصل إلى لوحة تحكم إدارة المكتبة للمتابعة والرد.' : 'Your message was sent successfully and delivered to the administration.' }}>
+  const form = document.getElementById('contact-form');
+  const alertBox = document.getElementById('form-alert');
+  const submitBtn = document.getElementById('submit-btn');
 
   if (form && alertBox && submitBtn) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       submitBtn.disabled = true;
-      submitBtn.textContent = 'جارٍ الإرسال...';
+      submitBtn.textContent = sendingText;
       alertBox.className = 'hidden';
 
       const formData = new FormData(form);
@@ -146,19 +150,19 @@ import Layout from '../layouts/Layout.astro';
 
         const data = await res.json();
         if (res.ok && data.success) {
-          alertBox.textContent = 'تم إرسال رسالتك بنجاح! وستصل إلى لوحة تحكم إدارة المكتبة للمتابعة والرد.';
+          alertBox.textContent = successMsgText;
           alertBox.className = 'p-4 rounded-lg text-xs font-bold bg-green-100 text-green-800 border border-green-200 block';
           form.reset();
         } else {
-          alertBox.textContent = data.error || 'حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً.';
+          alertBox.textContent = data.error || 'Error sending message.';
           alertBox.className = 'p-4 rounded-lg text-xs font-bold bg-red-100 text-red-800 border border-red-200 block';
         }
       } catch (err) {
-        alertBox.textContent = 'تعذر الاتصال بالخادم، يرجى التحقق من اتصالك.';
+        alertBox.textContent = 'Connection error.';
         alertBox.className = 'p-4 rounded-lg text-xs font-bold bg-red-100 text-red-800 border border-red-200 block';
       } finally {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>إرسال الرسالة إلى إدارة المكتبة</span>`;
+        submitBtn.textContent = 'Sent';
       }
     });
   }

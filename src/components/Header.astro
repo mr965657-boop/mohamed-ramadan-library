@@ -1,22 +1,32 @@
 ---
+import { useTranslations, type Language } from '../lib/i18n';
+
 interface Props {
   currentPath?: string;
-  lang?: 'ar' | 'en';
+  lang?: Language;
 }
 
 const { currentPath = '/', lang = 'ar' } = Astro.props;
+const t = useTranslations(lang);
 
 const navLinks = [
-  { href: '/', label: 'الرئيسية', labelEn: 'Home' },
-  { href: '/books', label: 'الكتب والمؤلفات', labelEn: 'Books' },
-  { href: '/research', label: 'البحوث والدراسات', labelEn: 'Research' },
-  { href: '/articles', label: 'المقالات', labelEn: 'Articles' },
-  { href: '/lectures', label: 'المحاضرات', labelEn: 'Lectures' },
-  { href: '/literature', label: 'الأعمال الأدبية', labelEn: 'Literature' },
-  { href: '/educational', label: 'المواد التعليمية', labelEn: 'Educational' },
-  { href: '/about', label: 'عن المؤلف', labelEn: 'About' },
-  { href: '/contact', label: 'تواصل', labelEn: 'Contact' },
+  { href: '/', label: t.home },
+  { href: '/books', label: t.books },
+  { href: '/research', label: t.research },
+  { href: '/articles', label: t.articles },
+  { href: '/lectures', label: t.lectures },
+  { href: '/literature', label: t.literature },
+  { href: '/educational', label: t.educational },
+  { href: '/about', label: t.about },
+  { href: '/contact', label: t.contact },
 ];
+
+function buildUrl(base: string) {
+  if (lang === 'en') {
+    return base.includes('?') ? `${base}&lang=en` : `${base}?lang=en`;
+  }
+  return base;
+}
 ---
 
 <header class="sticky top-0 z-40 bg-[#F7F3E9]/95 dark:bg-[#0F141C]/95 backdrop-blur border-b border-[#E2DCD0] dark:border-[#2B384E] transition-colors">
@@ -27,16 +37,16 @@ const navLinks = [
     <div class="flex items-center justify-between h-20">
       
       <!-- شعار وهوية المكتبة -->
-      <a href="/" class="flex items-center gap-3.5 group">
+      <a href={buildUrl('/')} class="flex items-center gap-3.5 group">
         <div class="w-11 h-11 rounded-lg bg-[#143D33] text-[#B8924A] flex items-center justify-center font-amiri font-bold text-2xl shadow-md border border-[#B8924A]/40 group-hover:scale-105 transition-transform">
-          م
+          {lang === 'ar' ? 'م' : 'M'}
         </div>
         <div>
           <span class="block font-amiri font-bold text-xl sm:text-2xl text-[#143D33] dark:text-[#E5E9F0] leading-none tracking-tight">
-            مكتبة محمد رمضان
+            {t.brandName}
           </span>
           <span class="block text-[11px] font-sans text-[#B8924A] font-medium tracking-wider uppercase mt-1">
-            Mohamed Ramadan Digital Library
+            {t.brandSubtitle}
           </span>
         </div>
       </a>
@@ -47,10 +57,11 @@ const navLinks = [
           <input
             type="search"
             name="q"
-            placeholder="ابحث في الكتب والمقالات والمحاضرات..."
+            placeholder={t.searchPlaceholder}
             class="w-full pl-4 pr-10 py-2 text-sm bg-white dark:bg-[#1A2433] border border-[#E2DCD0] dark:border-[#2B384E] rounded-full focus:outline-none focus:ring-2 focus:ring-[#B8924A] focus:border-transparent text-[#151C24] dark:text-[#E5E9F0] placeholder-[#5A6578]"
           />
-          <button type="submit" aria-label="بحث" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5A6578] hover:text-[#143D33] transition-colors">
+          {lang === 'en' && <input type="hidden" name="lang" value="en" />}
+          <button type="submit" aria-label={t.searchBtn} class="absolute right-3 top-1/2 -translate-y-1/2 text-[#5A6578] hover:text-[#143D33] transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
@@ -58,10 +69,10 @@ const navLinks = [
         </form>
       </div>
 
-      <!-- الإجراءات السريعة ولوحة الإدارة -->
+      <!-- الإجراءات السريعة ولوحة الإدارة وتبديل اللغة -->
       <div class="flex items-center gap-3">
         <!-- زر البحث للهواتف -->
-        <a href="/search" class="md:hidden p-2 text-[#151C24] dark:text-[#E5E9F0] hover:text-[#B8924A]" aria-label="البحث">
+        <a href={buildUrl('/search')} class="md:hidden p-2 text-[#151C24] dark:text-[#E5E9F0] hover:text-[#B8924A]" aria-label={t.searchBtn}>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
@@ -75,17 +86,21 @@ const navLinks = [
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
           </svg>
-          <span>لوحة التحكم</span>
+          <span>{t.admin}</span>
         </a>
 
-        <!-- تبديل اللغة -->
+        <!-- زر تبديل اللغة الفوري التفاعلي -->
         <button
+          id="lang-switcher-btn"
           type="button"
-          onclick="alert('الموقع معد لدعم الترجمة الكاملة (عربي / إنجليزي)')"
-          class="px-2.5 py-1 text-xs font-bold rounded text-[#1B365D] dark:text-[#E5E9F0] hover:bg-black/5 dark:hover:bg-white/10 transition-colors border border-transparent hover:border-[#E2DCD0]"
-          title="تبديل اللغة / Switch Language"
+          data-target-lang={t.switchLangCode}
+          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-[#143D33] text-[#B8924A] hover:bg-[#1F5A4B] border border-[#B8924A]/40 shadow-sm transition-all cursor-pointer"
+          title={`Switch to ${t.switchLangLabel}`}
         >
-          EN
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+          </svg>
+          <span>{t.switchLangLabel}</span>
         </button>
       </div>
 
@@ -94,20 +109,46 @@ const navLinks = [
     <!-- شريط التنقل بين الأقسام الستة -->
     <nav class="flex items-center gap-1 overflow-x-auto py-2.5 border-t border-[#E2DCD0]/60 dark:border-[#2B384E]/60 text-sm no-scrollbar">
       {navLinks.map((link) => {
+        const target = buildUrl(link.href);
         const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
         return (
           <a
-            href={link.href}
+            href={target}
             class={`whitespace-nowrap px-3 py-1 rounded-md transition-all font-medium ${
               isActive
                 ? 'bg-[#143D33] text-white dark:bg-[#B8924A] dark:text-[#0F141C] font-semibold shadow-sm'
                 : 'text-[#151C24] dark:text-[#E5E9F0] hover:text-[#143D33] dark:hover:text-[#B8924A] hover:bg-black/5 dark:hover:bg-white/5'
             }`}
           >
-            {lang === 'ar' ? link.label : link.labelEn}
+            {link.label}
           </a>
         );
       })}
     </nav>
   </div>
 </header>
+
+<script is:inline>
+  const switcher = document.getElementById('lang-switcher-btn');
+  if (switcher) {
+    switcher.addEventListener('click', () => {
+      const targetLang = switcher.getAttribute('data-target-lang') || 'en';
+      const url = new URL(window.location.href);
+      if (targetLang === 'ar') {
+        url.searchParams.delete('lang');
+      } else {
+        url.searchParams.set('lang', 'en');
+      }
+      localStorage.setItem('preferred_lang', targetLang);
+      window.location.href = url.toString();
+    });
+  }
+
+  // التبديل التلقائي إذا كان المستخدم اختار الإنجليزية مسبقاً ولم يكن الرابط يحتوي على معيار
+  const currentUrl = new URL(window.location.href);
+  const preferred = localStorage.getItem('preferred_lang');
+  if (preferred === 'en' && !currentUrl.searchParams.has('lang')) {
+    currentUrl.searchParams.set('lang', 'en');
+    window.location.replace(currentUrl.toString());
+  }
+</script>

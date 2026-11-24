@@ -13,13 +13,19 @@ interface Props {
   canonical?: string;
 }
 
+const urlLang = (Astro.url.searchParams.get('lang') as 'ar' | 'en') || 'ar';
+
 const {
   title,
-  description = 'مكتبة محمد رمضان المعرفية الرقمية - منصة علمية وبحثية تجمع بين التراث الإسلامي والأصالة المعاصرة في بيئة قراءة وبحث متطورة.',
-  keywords = ['مكتبة محمد رمضان', 'كتب إسلامية', 'بحوث أكاديمية', 'مقالات فكرية', 'محاضرات صوتية'],
+  description = urlLang === 'ar' 
+    ? 'مكتبة محمد رمضان المعرفية الرقمية - منصة علمية وبحثية تجمع بين التراث الإسلامي والأصالة المعاصرة في بيئة قراءة وبحث متطورة.'
+    : 'Mohamed Ramadan Digital Library - A scholarly digital platform uniting authentic Islamic heritage with contemporary thought.',
+  keywords = urlLang === 'ar'
+    ? ['مكتبة محمد رمضان', 'كتب إسلامية', 'بحوث أكاديمية', 'مقالات فكرية', 'محاضرات صوتية']
+    : ['Mohamed Ramadan Library', 'Islamic heritage', 'Academic research', 'Essays', 'Audio lectures'],
   image = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1200',
   type = 'website',
-  lang = 'ar',
+  lang = urlLang,
   canonical = Astro.url.href,
 } = Astro.props;
 
@@ -27,11 +33,11 @@ const isRTL = lang === 'ar';
 ---
 
 <!doctype html>
-<html lang={lang} dir={isRTL ? 'rtl' : 'ltr'}>
+<html lang={lang} dir={isRTL ? 'rtl' : 'ltr'} class={isRTL ? 'font-arabic' : 'font-english'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} | مكتبة محمد رمضان</title>
+    <title>{title} | {lang === 'ar' ? 'مكتبة محمد رمضان' : 'Mohamed Ramadan Library'}</title>
     <meta name="description" content={description} />
     <meta name="keywords" content={keywords.join(', ')} />
     <link rel="canonical" href={canonical} />
@@ -39,14 +45,14 @@ const isRTL = lang === 'ar';
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:title" content={`${title} | مكتبة محمد رمضان`} />
+    <meta property="og:title" content={`${title} | ${lang === 'ar' ? 'مكتبة محمد رمضان' : 'Mohamed Ramadan Library'}`} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={image} />
     <meta property="og:locale" content={isRTL ? 'ar_AR' : 'en_US'} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={`${title} | مكتبة محمد رمضان`} />
+    <meta name="twitter:title" content={`${title} | ${lang === 'ar' ? 'مكتبة محمد رمضان' : 'Mohamed Ramadan Library'}`} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={image} />
 
@@ -62,7 +68,7 @@ const isRTL = lang === 'ar';
       <slot />
     </main>
 
-    <Footer />
+    <Footer lang={lang} />
 
     <script is:inline>
       if ('serviceWorker' in navigator) {

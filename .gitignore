@@ -22,3 +22,5 @@ pnpm-debug.log*
 
 # Supabase local temp
 .supabase/
+
+.vercel
