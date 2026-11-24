@@ -9,6 +9,16 @@ if (!auth.authorized) {
 }
 
 const items = await getAdminItems();
+
+const typeLabels: Record<string, { label: string; color: string; path: string }> = {
+  book: { label: '📚 الكتب والمؤلفات', color: 'bg-emerald-50 text-emerald-800 border border-emerald-200', path: 'books' },
+  article: { label: '✍️ المقالات الفكرية', color: 'bg-amber-50 text-amber-800 border border-amber-200', path: 'articles' },
+  research: { label: '🔬 البحوث والدراسات', color: 'bg-blue-50 text-blue-800 border border-blue-200', path: 'research' },
+  lecture: { label: '🎙️ المحاضرات والدروس', color: 'bg-indigo-50 text-indigo-800 border border-indigo-200', path: 'lectures' },
+  literature: { label: '📖 الأعمال الأدبية', color: 'bg-rose-50 text-rose-800 border border-rose-200', path: 'literature' },
+  educational: { label: '🎓 المواد التعليمية', color: 'bg-teal-50 text-teal-800 border border-teal-200', path: 'educational' },
+  project: { label: '🏛️ مشاريع بحثية', color: 'bg-purple-50 text-purple-800 border border-purple-200', path: 'research' },
+};
 ---
 
 <AdminLayout title="إدارة محتويات المكتبة (CRUD)">
@@ -34,7 +44,7 @@ const items = await getAdminItems();
         <table class="w-full text-right text-xs">
           <thead class="bg-[#FAF7F0] border-b border-[#E2DCD0] text-[#143D33] font-bold">
             <tr>
-              <th class="p-4">النوع</th>
+              <th class="p-4">القسم في الموقع</th>
               <th class="p-4">العنوان</th>
               <th class="p-4">المؤلف</th>
               <th class="p-4">الحالة</th>
@@ -44,49 +54,56 @@ const items = await getAdminItems();
             </tr>
           </thead>
           <tbody class="divide-y divide-[#E2DCD0]/60">
-            {items.map((item) => (
-              <tr class="hover:bg-gray-50/80 transition-colors" id={`row-${item.id}`}>
-                <td class="p-4">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#143D33]/10 text-[#143D33]">
-                    {item.type}
-                  </span>
-                </td>
-                <td class="p-4 font-bold text-[#151C24] max-w-xs truncate">
-                  {item.title}
-                </td>
-                <td class="p-4 text-[#5A6578]">{item.author}</td>
-                <td class="p-4">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800">
-                    {item.status === 'published' ? 'منشور' : 'مسودة'}
-                  </span>
-                </td>
-                <td class="p-4 font-sans font-semibold text-gray-600">{item.view_count}</td>
-                <td class="p-4 font-sans font-semibold text-gray-600">{item.download_count}</td>
-                <td class="p-4 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <a
-                      href={`/${item.type === 'book' ? 'books' : (item.type === 'research' || item.type === 'project') ? 'research' : item.type === 'article' ? 'articles' : item.type === 'lecture' ? 'lectures' : item.type === 'literature' ? 'literature' : 'educational'}/${item.slug}`}
-                      target="_blank"
-                      class="px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded font-semibold"
-                    >
-                      معاينة
-                    </a>
-                    <a
-                      href={`/admin/items/edit/${item.id}`}
-                      class="px-2.5 py-1 bg-amber-50 text-amber-800 hover:bg-amber-100 rounded font-semibold border border-amber-200"
-                    >
-                      تعديل ✏️
-                    </a>
-                    <button
-                      onclick={`deleteItem('${item.id}', '${item.title}')`}
-                      class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded font-semibold"
-                    >
-                      حذف
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {items.map((item) => {
+              const sec = typeLabels[item.type] || { label: item.type, color: 'bg-gray-100 text-gray-800', path: 'books' };
+              const publicLink = `/${sec.path}/${item.slug}`;
+              return (
+                <tr class="hover:bg-gray-50/80 transition-colors" id={`row-${item.id}`}>
+                  <td class="p-4">
+                    <span class={`px-2.5 py-1 rounded text-[11px] font-bold inline-block ${sec.color}`}>
+                      {sec.label}
+                    </span>
+                  </td>
+                  <td class="p-4 font-bold text-[#151C24] max-w-xs">
+                    <div class="truncate">{item.title}</div>
+                    <div class="text-[10px] text-[#5A6578] font-mono mt-0.5">{item.slug}</div>
+                  </td>
+                  <td class="p-4 text-[#5A6578]">{item.author}</td>
+                  <td class="p-4">
+                    <span class={`px-2 py-0.5 rounded text-[10px] font-bold ${item.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                      {item.status === 'published' ? 'منشور للزوار' : 'مسودة خاصة'}
+                    </span>
+                  </td>
+                  <td class="p-4 font-sans font-semibold text-gray-600">{item.view_count || 0}</td>
+                  <td class="p-4 font-sans font-semibold text-gray-600">{item.download_count || 0}</td>
+                  <td class="p-4 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                      <a
+                        href={publicLink}
+                        target="_blank"
+                        class="px-2.5 py-1 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 rounded font-bold text-[11px] flex items-center gap-1 shadow-sm"
+                        title="مشاهدة العمل كما يراه الزوار في الموقع العام"
+                      >
+                        <span>👁️</span>
+                        <span>عرض في الموقع</span>
+                      </a>
+                      <a
+                        href={`/admin/items/edit/${item.id}`}
+                        class="px-2.5 py-1 bg-amber-50 text-amber-800 hover:bg-amber-100 rounded font-semibold border border-amber-200 text-[11px]"
+                      >
+                        تعديل ✏️
+                      </a>
+                      <button
+                        onclick={`deleteItem('${item.id}', '${item.title}')`}
+                        class="px-2.5 py-1 bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded font-semibold text-[11px] cursor-pointer"
+                      >
+                        حذف نهائي 🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -48,12 +48,12 @@ export const POST: APIRoute = async ({ request }) => {
       author: data.author || 'محمد رمضان',
       cover_image_url: data.cover_image_url || null,
       file_url: data.file_url || null,
-      file_size: data.file_size || null,
+      file_size: data.file_size ? parseInt(data.file_size) : null,
       page_count: data.page_count ? parseInt(data.page_count) : null,
       duration_seconds: data.duration_seconds ? parseInt(data.duration_seconds) : null,
       audio_transcript: data.audio_transcript || null,
       category_id: data.category_id || null,
-      tags: data.tags ? data.tags.split(',').map((t: string) => t.trim()) : [],
+      tags: data.tags ? (typeof data.tags === 'string' ? data.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : data.tags) : [],
       status: data.status || 'published',
       published_at: new Date().toISOString(),
       allow_download: data.allow_download ?? true,
@@ -79,8 +79,8 @@ export const POST: APIRoute = async ({ request }) => {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: 'حدث خطأ أثناء حفظ المحتوى' }), {
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error?.message || 'حدث خطأ أثناء حفظ المحتوى' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

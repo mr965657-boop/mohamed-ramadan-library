@@ -690,12 +690,14 @@ export async function getItems(options?: {
       }
       const { data, error } = await query;
       if (!error && data) return data;
+      if (error) console.error('Supabase getItems error:', error);
     } catch (e) {
-      console.warn('Fallback to local items');
+      console.warn('Fallback to local items', e);
     }
+    return [];
   }
 
-  // فلترة المتجر المحلي
+  // فلترة المتجر المحلي فقط عند عدم تهيئة Supabase
   return memoryItems.filter((item) => {
     if (item.status !== 'published') return false;
     if (options?.type && item.type !== options.type) return false;
@@ -712,11 +714,13 @@ export async function getItemBySlug(slug: string, language: 'ar' | 'en' = 'ar'):
         .select('*, category:categories(*)')
         .eq('slug', slug)
         .eq('language', language)
-        .single();
-      if (!error && data) return data;
+        .maybeSingle();
+      if (!error) return data;
+      if (error) console.error('Supabase getItemBySlug error:', error);
     } catch (e) {
-      console.warn('Fallback to local getItemBySlug');
+      console.warn('Fallback to local getItemBySlug', e);
     }
+    return null;
   }
   return memoryItems.find((i) => i.slug === slug && i.language === language) || null;
 }
@@ -728,11 +732,13 @@ export async function getItemById(id: string): Promise<Item | null> {
         .from('items')
         .select('*, category:categories(*)')
         .eq('id', id)
-        .single();
-      if (!error && data) return data;
+        .maybeSingle();
+      if (!error) return data;
+      if (error) console.error('Supabase getItemById error:', error);
     } catch (e) {
-      console.warn('Fallback to local getItemById');
+      console.warn('Fallback to local getItemById', e);
     }
+    return null;
   }
   return memoryItems.find((i) => i.id === id) || null;
 }
@@ -751,7 +757,23 @@ export async function searchLibrary(
   const normalized = queryText ? normalizeArabicText(queryText) : '';
   const lang = options?.language || 'ar';
 
-  return memoryItems.filter((item) => {
+  let itemsToSearch: Item[] = memoryItems;
+  if (isSupabaseConfigured && supabase) {
+    try {
+      let q = supabase
+        .from('items')
+        .select('*, category:categories(*)')
+        .eq('language', lang)
+        .eq('status', 'published');
+      if (options?.type) q = q.eq('type', options.type);
+      const { data, error } = await q;
+      if (!error && data) itemsToSearch = data;
+    } catch (e) {
+      console.warn('Fallback search to local memory');
+    }
+  }
+
+  return itemsToSearch.filter((item) => {
     if (item.status !== 'published') return false;
     if (options?.language && item.language !== options.language) return false;
     if (options?.type && item.type !== options.type) return false;
@@ -777,7 +799,7 @@ export async function searchLibrary(
     const normAbstract = normalizeArabicText(item.abstract || '');
     const normAuthor = normalizeArabicText(item.author);
     const normContent = normalizeArabicText(item.content || '');
-    const normTags = item.tags.map(t => normalizeArabicText(t)).join(' ');
+    const normTags = (item.tags || []).map(t => normalizeArabicText(t)).join(' ');
 
     return (
       normTitle.includes(normalized) ||
@@ -792,7 +814,19 @@ export async function searchLibrary(
 
 // دالة جلب اقتراحات القراءة والمواد ذات الصلة
 export async function getRecommendations(limit: number = 4, language: 'ar' | 'en' = 'ar'): Promise<Item[]> {
-  return memoryItems
+  let pool: Item[] = memoryItems;
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('items')
+        .select('*, category:categories(*)')
+        .eq('language', language)
+        .eq('status', 'published')
+        .limit(20);
+      if (!error && data) pool = data;
+    } catch (e) {}
+  }
+  return pool
     .filter(i => i.status === 'published' && i.language === language)
     .sort(() => 0.5 - Math.random())
     .slice(0, limit);
@@ -874,7 +908,28 @@ export async function subscribeNewsletter(
 // ====================================================================
 
 export async function getAdminStats() {
-  const allItems = memoryItems;
+  let allItems = memoryItems;
+  let allCategories = memoryCategories;
+  let msgCount = memoryMessages.filter(m => m.status === 'new').length;
+  let subCount = memorySubscribers.length;
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const [itemsRes, catsRes, msgsRes, subsRes] = await Promise.all([
+        supabase.from('items').select('*'),
+        supabase.from('categories').select('*'),
+        supabase.from('messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),
+        supabase.from('subscribers').select('id', { count: 'exact', head: true }),
+      ]);
+      if (itemsRes.data) allItems = itemsRes.data;
+      if (catsRes.data) allCategories = catsRes.data;
+      if (typeof msgsRes.count === 'number') msgCount = msgsRes.count;
+      if (typeof subsRes.count === 'number') subCount = subsRes.count;
+    } catch (e) {
+      console.warn('Error fetching admin stats from Supabase', e);
+    }
+  }
+
   return {
     totalBooks: allItems.filter(i => i.type === 'book').length,
     totalResearch: allItems.filter(i => i.type === 'research').length,
@@ -883,10 +938,10 @@ export async function getAdminStats() {
     totalLiterature: allItems.filter(i => i.type === 'literature').length,
     totalEducational: allItems.filter(i => i.type === 'educational').length,
     totalProjects: allItems.filter(i => i.type === 'project').length,
-    totalCategories: memoryCategories.length,
+    totalCategories: allCategories.length,
     totalItems: allItems.length,
-    newMessagesCount: memoryMessages.filter(m => m.status === 'new').length,
-    subscribersCount: memorySubscribers.length,
+    newMessagesCount: msgCount,
+    subscribersCount: subCount,
   };
 }
 
@@ -938,6 +993,18 @@ export async function deleteCategory(id: string): Promise<boolean> {
 }
 
 export async function getAdminItems(): Promise<Item[]> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('items')
+        .select('*, category:categories(*)')
+        .order('created_at', { ascending: false });
+      if (!error && data) return data;
+      if (error) console.error('Supabase getAdminItems error:', error);
+    } catch (e) {
+      console.warn('Fallback to local admin items', e);
+    }
+  }
   return [...memoryItems];
 }
 
@@ -951,22 +1018,88 @@ export async function createItem(itemData: Omit<Item, 'id' | 'created_at' | 'upd
     updated_at: new Date().toISOString(),
   };
 
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('items')
+        .insert([newItem])
+        .select('*, category:categories(*)')
+        .single();
+      if (!error && data) {
+        memoryItems.unshift(data);
+        return data;
+      }
+      if (error) {
+        console.error('Supabase createItem error:', error);
+        throw new Error(error.message || 'فشل حفظ العمل في قاعدة البيانات');
+      }
+    } catch (e: any) {
+      console.error('Exception in createItem:', e);
+      throw e;
+    }
+  }
+
   memoryItems.unshift(newItem);
   return newItem;
 }
 
 export async function updateItem(id: string, updates: Partial<Item>): Promise<Item | null> {
+  const cleanUpdates = {
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('items')
+        .update(cleanUpdates)
+        .eq('id', id)
+        .select('*, category:categories(*)')
+        .maybeSingle();
+      if (!error && data) {
+        const index = memoryItems.findIndex(i => i.id === id);
+        if (index !== -1) memoryItems[index] = data;
+        return data;
+      }
+      if (error) {
+        console.error('Supabase updateItem error:', error);
+        throw new Error(error.message || 'فشل تعديل المحتوى في قاعدة البيانات');
+      }
+    } catch (e: any) {
+      console.error('Exception in updateItem:', e);
+      throw e;
+    }
+  }
+
   const index = memoryItems.findIndex(i => i.id === id);
   if (index === -1) return null;
   memoryItems[index] = {
     ...memoryItems[index],
-    ...updates,
-    updated_at: new Date().toISOString(),
+    ...cleanUpdates,
   };
   return memoryItems[index];
 }
 
 export async function deleteItem(id: string): Promise<boolean> {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', id);
+      if (!error) {
+        memoryItems = memoryItems.filter(i => i.id !== id);
+        return true;
+      }
+      console.error('Supabase deleteItem error:', error);
+      return false;
+    } catch (e) {
+      console.error('Exception in deleteItem:', e);
+      return false;
+    }
+  }
+
   const initialLen = memoryItems.length;
   memoryItems = memoryItems.filter(i => i.id !== id);
   return memoryItems.length < initialLen;

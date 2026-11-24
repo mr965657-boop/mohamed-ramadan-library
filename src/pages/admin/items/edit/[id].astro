@@ -28,27 +28,39 @@ if (!item) {
       <form id="edit-item-form" class="space-y-6">
         <input type="hidden" name="id" value={item.id} />
         
-        <!-- نوع المحتوى واللغة والتصنيف -->
+        <!-- نوع المحتوى واللغة والتصنيف ومكان الظهور -->
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-1.5">
-              نوع العمل <span class="text-red-500">*</span>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-[#143D33] mb-1.5 flex items-center justify-between">
+              <span>أين يظهر هذا العمل في الموقع؟ (القسم الرئيسي)</span>
+              <span class="text-red-500">*</span>
             </label>
-            <select name="type" id="type-select" required class="w-full px-3 py-2 text-xs rounded-lg border border-[#E2DCD0] bg-white focus:ring-2 focus:ring-[#143D33]">
-              <option value="book" selected={item.type === 'book'}>كتاب ومؤلف</option>
-              <option value="research" selected={item.type === 'research'}>بحث ودراسة أكاديمية</option>
-              <option value="project" selected={item.type === 'project'}>مشروع بحثي متكامل</option>
-              <option value="article" selected={item.type === 'article'}>مقال فكري</option>
-              <option value="lecture" selected={item.type === 'lecture'}>محاضرة ودرس صوتي</option>
-              <option value="literature" selected={item.type === 'literature'}>عمل أدبي</option>
-              <option value="educational" selected={item.type === 'educational'}>مادة تعليمية</option>
+            <select name="type" id="type-select" required class="w-full px-3 py-2 text-xs rounded-lg border-2 border-[#B8924A]/60 bg-white font-bold text-[#143D33] focus:ring-2 focus:ring-[#143D33]">
+              <option value="book" selected={item.type === 'book'}>📚 الكتب والمؤلفات (يظهر في صفحة الكتب والرئيسية)</option>
+              <option value="article" selected={item.type === 'article'}>✍️ المقالات الفكرية (يظهر في صفحة المقالات والرئيسية)</option>
+              <option value="research" selected={item.type === 'research'}>🔬 البحوث والدراسات (يظهر في صفحة البحوث والرئيسية)</option>
+              <option value="lecture" selected={item.type === 'lecture'}>🎙️ المحاضرات والدروس (يظهر في صفحة المحاضرات الصوتية)</option>
+              <option value="literature" selected={item.type === 'literature'}>📖 الأعمال الأدبية (يظهر في صفحة الأعمال الأدبية)</option>
+              <option value="educational" selected={item.type === 'educational'}>🎓 المواد التعليمية (يظهر في صفحة المواد التعليمية والمناهج)</option>
+              <option value="project" selected={item.type === 'project'}>🏛️ مشروع بحثي متكامل (يظهر في قسم المشاريع بالبحوث)</option>
             </select>
+            <div id="type-destination-note" class="mt-1.5 text-[11px] text-[#143D33] font-semibold bg-[#FAF7F0] px-2.5 py-1.5 rounded-lg border border-[#E2DCD0]">
+              📍 المكان في الموقع: <span id="destination-text" class="text-[#B8924A] font-bold">
+                {item.type === 'book' ? 'قسم الكتب والمؤلفات (/books) والرئيسية' : 
+                 item.type === 'article' ? 'قسم المقالات الفكرية (/articles) والرئيسية' : 
+                 item.type === 'research' ? 'قسم البحوث والدراسات الأكاديمية (/research) والرئيسية' : 
+                 item.type === 'lecture' ? 'قسم المحاضرات والدروس الصوتية (/lectures) والرئيسية' : 
+                 item.type === 'literature' ? 'قسم الأعمال الأدبية الإبداعية (/literature) والرئيسية' : 
+                 item.type === 'educational' ? 'قسم المواد التعليمية والمناهج (/educational) والرئيسية' : 
+                 'قسم المشاريع الأكاديمية بالبحوث'}
+              </span>
+            </div>
           </div>
 
           <div>
             <label class="block text-xs font-bold text-[#143D33] mb-1.5">التصنيف الموضوعي</label>
             <select name="category_id" class="w-full px-3 py-2 text-xs rounded-lg border border-[#E2DCD0] bg-white">
-              <option value="">-- اختر التصنيف --</option>
+              <option value="">-- اختياري: اختر التصنيف --</option>
               {categories.map((c) => (
                 <option value={c.id} selected={item.category_id === c.id}>{c.name_ar} ({c.name_en})</option>
               ))}
@@ -61,15 +73,13 @@ if (!item) {
               <option value="ar" selected={item.language === 'ar'}>العربية (RTL)</option>
               <option value="en" selected={item.language === 'en'}>English (LTR)</option>
             </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold text-[#143D33] mb-1.5">حالة النشر</label>
-            <select name="status" class="w-full px-3 py-2 text-xs rounded-lg border border-[#E2DCD0] bg-white">
-              <option value="published" selected={item.status === 'published'}>منشور فوراً</option>
-              <option value="draft" selected={item.status === 'draft'}>حفظ كمسودة</option>
-              <option value="archived" selected={item.status === 'archived'}>مؤرشف</option>
-            </select>
+            <div class="mt-2">
+              <label class="block text-[11px] font-bold text-[#143D33] mb-1">حالة النشر</label>
+              <select name="status" class="w-full px-2.5 py-1 text-xs rounded border border-[#E2DCD0] bg-white">
+                <option value="published" selected={item.status === 'published'}>منشور للجميع</option>
+                <option value="draft" selected={item.status === 'draft'}>مسودة خاصة</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -847,6 +857,24 @@ if (!item) {
       syncContent();
     });
   });
+
+  // تحديث مكان ظهور العمل في الموقع ديناميكياً
+  const typeSelect = document.getElementById('type-select');
+  const destinationText = document.getElementById('destination-text');
+  const destinations = {
+    book: 'قسم الكتب والمؤلفات (/books) والرئيسية',
+    article: 'قسم المقالات الفكرية (/articles) والرئيسية',
+    research: 'قسم البحوث والدراسات الأكاديمية (/research) والرئيسية',
+    lecture: 'قسم المحاضرات والدروس الصوتية (/lectures) والرئيسية',
+    literature: 'قسم الأعمال الأدبية الإبداعية (/literature) والرئيسية',
+    educational: 'قسم المواد التعليمية والمناهج (/educational) والرئيسية',
+    project: 'قسم المشاريع الأكاديمية بالبحوث (/research?filter=projects)',
+  };
+  if (typeSelect && destinationText) {
+    typeSelect.addEventListener('change', () => {
+      destinationText.textContent = destinations[typeSelect.value] || 'المكتبة';
+    });
+  }
 
   const form = document.getElementById('edit-item-form');
   const msgBox = document.getElementById('form-msg');
