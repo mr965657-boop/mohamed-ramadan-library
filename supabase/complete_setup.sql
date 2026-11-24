@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS public.items (
     issue TEXT,
     pages_range TEXT,
     peer_reviewed BOOLEAN DEFAULT false,
-    references JSONB DEFAULT '[]'::jsonb,
+    "references" JSONB DEFAULT '[]'::jsonb,
     is_demo BOOLEAN DEFAULT false,
 
     seo_title TEXT,
