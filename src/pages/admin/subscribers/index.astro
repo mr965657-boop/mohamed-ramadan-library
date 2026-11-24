@@ -1,6 +1,12 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { getAdminSubscribers } from '../../../lib/db';
+import { verifyAdminSession } from '../../../lib/auth';
+
+const auth = await verifyAdminSession(Astro.request, 'reader');
+if (!auth.authorized) {
+  return Astro.redirect('/admin/login');
+}
 
 const subscribers = await getAdminSubscribers();
 const activeCount = subscribers.filter(s => s.status === 'active').length;

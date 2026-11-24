@@ -1,6 +1,12 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { getAdminStats, getAdminItems, getAdminMessages } from '../../lib/db';
+import { verifyAdminSession } from '../../lib/auth';
+
+const auth = await verifyAdminSession(Astro.request, 'reader');
+if (!auth.authorized) {
+  return Astro.redirect('/admin/login');
+}
 
 const stats = await getAdminStats();
 const recentItems = (await getAdminItems()).slice(0, 5);

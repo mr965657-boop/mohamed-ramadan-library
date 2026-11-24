@@ -1,5 +1,11 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { verifyAdminSession } from '../../../lib/auth';
+
+const auth = await verifyAdminSession(Astro.request, 'reader');
+if (!auth.authorized) {
+  return Astro.redirect('/admin/login');
+}
 ---
 
 <AdminLayout title="إعدادات النظام وإدارة الصلاحيات (RBAC)">

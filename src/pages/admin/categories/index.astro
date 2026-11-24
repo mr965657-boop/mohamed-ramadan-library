@@ -1,6 +1,12 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { getCategories } from '../../../lib/db';
+import { verifyAdminSession } from '../../../lib/auth';
+
+const auth = await verifyAdminSession(Astro.request, 'reader');
+if (!auth.authorized) {
+  return Astro.redirect('/admin/login');
+}
 
 const categories = await getCategories();
 const parentCategories = categories.filter(c => !c.parent_id);
